@@ -196,7 +196,7 @@ export function HeroSection() {
                         width={1000}
                         height={200}
                         className="mx-auto h-10 w-auto sm:h-16 md:h-48 lg:h-54"
-                        priority
+                       
                       />
                     ) : (
                       line

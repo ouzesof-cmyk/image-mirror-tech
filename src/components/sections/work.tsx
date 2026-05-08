@@ -132,7 +132,7 @@ export function WorkSection() {
               >
                 SEE WORKS
                 <span className="transition-transform group-hover:translate-x-1">→</span>
-              </Link>
+              </a>
             </div>
           </div>
         </div>
@@ -152,7 +152,7 @@ export function WorkSection() {
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                   className="group"
                 >
-                  <Link href={`/portfolio/${project.slug}`} className="block">
+                  <a href={`/portfolio/${project.slug}`} className="block">
                     <div className="relative aspect-[4/3] overflow-hidden bg-muted">
                       <img
                         src={project.image_url || '/images/placeholder.jpg'}
@@ -171,7 +171,7 @@ export function WorkSection() {
                         {project.subtitle}
                       </p>
                     </div>
-                  </Link>
+                  </a>
                 </motion.div>
               ))}
             </div>
@@ -193,7 +193,7 @@ export function WorkSection() {
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                   className="group relative flex-shrink-0"
                 >
-                  <Link href={`/portfolio/${project.slug}`} className="block">
+                  <a href={`/portfolio/${project.slug}`} className="block">
                     <div className="relative aspect-[3/4] w-[260px] sm:w-[350px] overflow-hidden bg-muted lg:w-[450px]">
                       <img
                         src={project.image_url || '/images/placeholder.jpg'}
@@ -220,7 +220,7 @@ export function WorkSection() {
                         </p>
                       </div>
                     </div>
-                  </Link>
+                  </a>
                 </motion.div>
               ))}
             </motion.div>

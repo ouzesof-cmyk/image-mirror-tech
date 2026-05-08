@@ -72,7 +72,7 @@ export function Navigation() {
         }`}
       >
         <nav className={`mx-auto flex max-w-7xl items-center justify-between px-6 py-5 lg:px-8 ${isRTL ? 'flex-row-reverse' : ''}`}>
-          <Link to="/" className="flex items-center">
+          <a href="/" className="flex items-center">
             <img
               src="/images/logo-full.png"
               alt="OUZESOF"
@@ -80,7 +80,7 @@ export function Navigation() {
               height={32}
               className="h-8 w-auto"
             />
-          </Link>
+          </a>
 
           {/* Desktop Navigation */}
           <ul className={`hidden items-center gap-10 md:flex ${isRTL ? 'flex-row-reverse' : ''}`}>
@@ -92,7 +92,7 @@ export function Navigation() {
                 >
                   {link.label}
                   <span className={`absolute -bottom-1 ${isRTL ? 'right-0' : 'left-0'} h-px w-0 bg-accent-gold transition-all duration-300 group-hover:w-full`} />
-                </Link>
+                </a>
               </li>
             ))}
           </ul>
@@ -141,7 +141,7 @@ export function Navigation() {
               className="border border-foreground px-5 py-2 text-xs tracking-[0.15em] text-foreground transition-all hover:bg-foreground hover:text-background"
             >
               {t.nav.startProject}
-            </Link>
+            </a>
           </div>
 
           {/* Mobile Menu Button */}
@@ -206,7 +206,7 @@ export function Navigation() {
                       className="font-serif text-4xl tracking-[0.1em] text-primary-foreground"
                     >
                       {link.label}
-                    </Link>
+                    </a>
                   </motion.li>
                 ))}
               </motion.ul>
@@ -247,7 +247,7 @@ export function Navigation() {
                   className="border border-primary-foreground px-8 py-3 text-sm tracking-[0.15em] text-primary-foreground"
                 >
                   {t.nav.startProject}
-                </Link>
+                </a>
               </motion.div>
               
               <motion.div

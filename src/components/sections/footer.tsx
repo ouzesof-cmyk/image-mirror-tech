@@ -57,7 +57,7 @@ export function Footer() {
             >
               {t.nav.startProject}
               <span className={`transition-transform ${isRTL ? 'group-hover:-translate-x-1 rotate-180' : 'group-hover:translate-x-1'}`}>→</span>
-            </Link>
+            </a>
           </motion.div>
         </div>
       </div>
@@ -73,7 +73,7 @@ export function Footer() {
           <div className={`grid grid-cols-2 gap-8 sm:gap-12 lg:grid-cols-4`}>
             {/* Brand */}
             <div className={`col-span-2 lg:col-span-1 ${isRTL ? 'text-right' : ''}`}>
-              <Link to="/" className="inline-block">
+              <a href="/" className="inline-block">
                 <img
                   src="/images/logo-icon.png"
                   alt="OUZESOF"
@@ -81,7 +81,7 @@ export function Footer() {
                   height={48}
                   className="h-10 sm:h-12 w-auto"
                 />
-              </Link>
+              </a>
               <p className="mt-4 sm:mt-6 max-w-xs text-xs sm:text-sm leading-relaxed text-foreground-secondary">
                 {t.footer.tagline}
               </p>
@@ -99,7 +99,7 @@ export function Footer() {
                     >
                       <span className={`inline-block h-px w-0 bg-accent-gold transition-all group-hover:w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                       {link.label}
-                    </Link>
+                    </a>
                   </li>
                 ))}
               </ul>
@@ -155,10 +155,10 @@ export function Footer() {
             <div className={`flex items-center gap-4 sm:gap-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
               <a href="#" className="text-[10px] sm:text-xs tracking-[0.1em] text-foreground-secondary transition-colors hover:text-foreground">
                 Privacy Policy
-              </Link>
+              </a>
               <a href="#" className="text-[10px] sm:text-xs tracking-[0.1em] text-foreground-secondary transition-colors hover:text-foreground">
                 Terms of Service
-              </Link>
+              </a>
             </div>
           </div>
         </div>

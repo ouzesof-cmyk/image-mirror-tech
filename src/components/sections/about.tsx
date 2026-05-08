@@ -58,7 +58,7 @@ export function AboutSection() {
               >
                 {t.about.seeWorks}
                 <span className={`transition-transform ${isRTL ? 'group-hover:-translate-x-1 rotate-180' : 'group-hover:translate-x-1'}`}>→</span>
-              </Link>
+              </a>
             </motion.div>
           </div>
           

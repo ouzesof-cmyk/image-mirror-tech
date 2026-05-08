@@ -62,7 +62,7 @@ export function TestimonialsSection() {
           >
             Get in touch
             <span className="transition-transform group-hover:translate-x-1">→</span>
-          </Link>
+          </a>
           
           <div className="flex items-center gap-2 sm:gap-4">
             <button

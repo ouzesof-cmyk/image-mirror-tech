@@ -47,7 +47,7 @@ export function IntroSection() {
                 >
                   →
                 </motion.span>
-              </Link>
+              </a>
             </motion.div>
           </div>
 

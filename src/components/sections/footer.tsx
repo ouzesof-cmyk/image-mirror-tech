@@ -93,7 +93,7 @@ export function Footer() {
               <ul className="space-y-2 sm:space-y-4">
                 {quickLinks.map((link) => (
                   <li key={link.label}>
-                    <Link
+                    <a
                       href={link.href}
                       className={`group inline-flex items-center text-xs sm:text-sm text-foreground transition-colors hover:text-accent-gold ${isRTL ? 'flex-row-reverse' : ''}`}
                     >

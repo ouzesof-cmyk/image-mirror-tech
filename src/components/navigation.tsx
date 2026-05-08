@@ -86,7 +86,7 @@ export function Navigation() {
           <ul className={`hidden items-center gap-10 md:flex ${isRTL ? 'flex-row-reverse' : ''}`}>
             {navLinks.map((link) => (
               <li key={link.href}>
-                <Link
+                <a
                   href={link.href}
                   className="group relative text-xs tracking-[0.15em] text-foreground-secondary transition-colors hover:text-foreground"
                 >
@@ -200,7 +200,7 @@ export function Navigation() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 + index * 0.05 }}
                   >
-                    <Link
+                    <a
                       href={link.href}
                       onClick={() => setIsMobileMenuOpen(false)}
                       className="font-serif text-4xl tracking-[0.1em] text-primary-foreground"

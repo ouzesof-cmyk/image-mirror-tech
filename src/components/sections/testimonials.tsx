@@ -1,10 +1,6 @@
-'use client'
-
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect, useCallback } from 'react'
 import { SectionLabel } from '@/components/section-label'
-import Link from 'next/link'
-
 const testimonials = [
   {
     quote: "OUZESOF elevated every layer of our brand's online presence. From motion details to structural layout, every piece felt crafted and intentional. The site not only looked beautiful but performed well too — and the entire collaboration process was smooth.",
@@ -61,8 +57,7 @@ export function TestimonialsSection() {
         />
         
         <div className="flex flex-col sm:flex-row items-start justify-between gap-4 sm:gap-8 mb-8 sm:mb-16">
-          <Link
-            href="#contact"
+          <a href="#contact"
             className="group inline-flex items-center gap-2 border border-foreground px-4 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm tracking-[0.15em] text-foreground transition-all hover:bg-foreground hover:text-background"
           >
             Get in touch

@@ -1,10 +1,6 @@
-'use client'
-
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { useRef } from 'react'
 import { SectionLabel } from '@/components/section-label'
-import Link from 'next/link'
-
 export function IntroSection() {
   const containerRef = useRef(null)
   const { scrollYProgress } = useScroll({
@@ -42,8 +38,7 @@ export function IntroSection() {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="mt-6 sm:mt-10"
             >
-              <Link
-                href="#contact"
+              <a href="#contact"
                 className="group inline-flex items-center gap-2 sm:gap-3 border border-foreground px-6 sm:px-8 py-3 sm:py-4 text-xs sm:text-sm tracking-[0.15em] text-foreground transition-all hover:bg-foreground hover:text-background"
               >
                 Contact

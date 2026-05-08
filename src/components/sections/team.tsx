@@ -1,7 +1,4 @@
-'use client'
-
 import { motion } from 'framer-motion'
-import Image from 'next/image'
 import { SectionLabel } from '@/components/section-label'
 
 const team = [
@@ -63,7 +60,7 @@ export function TeamSection() {
               className="group"
             >
               <div className="relative mb-3 sm:mb-6 aspect-[3/4] overflow-hidden bg-muted">
-                <Image
+                <img
                   src={member.image}
                   alt={member.name}
                   fill

@@ -1,9 +1,5 @@
-'use client'
-
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import Link from 'next/link'
-import Image from 'next/image'
 import { Globe } from 'lucide-react'
 import { useLanguage } from '@/lib/language-context'
 import { Language } from '@/lib/translations'
@@ -76,8 +72,8 @@ export function Navigation() {
         }`}
       >
         <nav className={`mx-auto flex max-w-7xl items-center justify-between px-6 py-5 lg:px-8 ${isRTL ? 'flex-row-reverse' : ''}`}>
-          <Link href="/" className="flex items-center">
-            <Image
+          <Link to="/" className="flex items-center">
+            <img
               src="/images/logo-full.png"
               alt="OUZESOF"
               width={140}
@@ -141,8 +137,7 @@ export function Navigation() {
             </div>
 
             {/* Contact Button */}
-            <Link
-              href="#contact"
+            <a href="#contact"
               className="border border-foreground px-5 py-2 text-xs tracking-[0.15em] text-foreground transition-all hover:bg-foreground hover:text-background"
             >
               {t.nav.startProject}
@@ -247,8 +242,7 @@ export function Navigation() {
                 transition={{ delay: 0.4 }}
                 className="mt-8"
               >
-                <Link
-                  href="#contact"
+                <a href="#contact"
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="border border-primary-foreground px-8 py-3 text-sm tracking-[0.15em] text-primary-foreground"
                 >

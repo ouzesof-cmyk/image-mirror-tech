@@ -1,8 +1,4 @@
-'use client'
-
 import { motion } from 'framer-motion'
-import Link from 'next/link'
-import Image from 'next/image'
 import { Marquee } from '@/components/marquee'
 import { useLanguage } from '@/lib/language-context'
 
@@ -56,8 +52,7 @@ export function Footer() {
             transition={{ delay: 0.2 }}
             className="mt-6 sm:mt-10"
           >
-            <Link
-              href="#contact"
+            <a href="#contact"
               className={`group inline-flex items-center gap-2 border border-foreground bg-foreground px-6 sm:px-8 py-3 sm:py-4 text-xs sm:text-sm tracking-[0.15em] text-primary-foreground transition-all hover:bg-transparent hover:text-foreground ${isRTL ? 'flex-row-reverse' : ''}`}
             >
               {t.nav.startProject}
@@ -78,8 +73,8 @@ export function Footer() {
           <div className={`grid grid-cols-2 gap-8 sm:gap-12 lg:grid-cols-4`}>
             {/* Brand */}
             <div className={`col-span-2 lg:col-span-1 ${isRTL ? 'text-right' : ''}`}>
-              <Link href="/" className="inline-block">
-                <Image
+              <Link to="/" className="inline-block">
+                <img
                   src="/images/logo-icon.png"
                   alt="OUZESOF"
                   width={48}
@@ -158,10 +153,10 @@ export function Footer() {
               © {new Date().getFullYear()} OUZESOF. {t.footer.rights}
             </p>
             <div className={`flex items-center gap-4 sm:gap-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <Link href="#" className="text-[10px] sm:text-xs tracking-[0.1em] text-foreground-secondary transition-colors hover:text-foreground">
+              <a href="#" className="text-[10px] sm:text-xs tracking-[0.1em] text-foreground-secondary transition-colors hover:text-foreground">
                 Privacy Policy
               </Link>
-              <Link href="#" className="text-[10px] sm:text-xs tracking-[0.1em] text-foreground-secondary transition-colors hover:text-foreground">
+              <a href="#" className="text-[10px] sm:text-xs tracking-[0.1em] text-foreground-secondary transition-colors hover:text-foreground">
                 Terms of Service
               </Link>
             </div>

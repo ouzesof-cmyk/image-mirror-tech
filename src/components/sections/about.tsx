@@ -1,8 +1,5 @@
-'use client'
-
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { useRef } from 'react'
-import Link from 'next/link'
 import { SectionLabel } from '@/components/section-label'
 import { useLanguage } from '@/lib/language-context'
 
@@ -56,8 +53,7 @@ export function AboutSection() {
               transition={{ delay: 0.2 }}
               className="mt-10"
             >
-              <Link
-                href="#work"
+              <a href="#work"
                 className={`group inline-flex items-center gap-2 text-sm tracking-[0.15em] text-foreground transition-colors hover:text-accent-gold ${isRTL ? 'flex-row-reverse' : ''}`}
               >
                 {t.about.seeWorks}

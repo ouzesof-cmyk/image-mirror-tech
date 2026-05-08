@@ -1,8 +1,5 @@
-'use client'
-
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect, useCallback, useRef } from 'react'
-import Image from 'next/image'
 import { useLanguage } from '@/lib/language-context'
 
 export function HeroSection() {
@@ -193,7 +190,7 @@ export function HeroSection() {
                     className="font-serif text-3xl leading-tight text-foreground sm:text-5xl md:text-7xl lg:text-8xl"
                   >
                     {line === 'logo' ? (
-                      <Image
+                      <img
                         src="/images/logo-full.png"
                         alt="OUZESOF"
                         width={1000}

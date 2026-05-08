@@ -1,9 +1,5 @@
-'use client'
-
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { useRef, useEffect, useState } from 'react'
-import Image from 'next/image'
-import Link from 'next/link'
 import { SectionLabel } from '@/components/section-label'
 import { createClient } from '@/lib/supabase/client'
 
@@ -131,8 +127,7 @@ export function WorkSection() {
             </motion.p>
             
             <div className="flex items-start lg:justify-end">
-              <Link
-                href="#work"
+              <a href="#work"
                 className="group inline-flex items-center gap-2 text-xs sm:text-sm tracking-[0.15em] text-foreground transition-colors hover:text-accent-gold"
               >
                 SEE WORKS
@@ -159,7 +154,7 @@ export function WorkSection() {
                 >
                   <Link href={`/portfolio/${project.slug}`} className="block">
                     <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-                      <Image
+                      <img
                         src={project.image_url || '/images/placeholder.jpg'}
                         alt={project.title}
                         fill
@@ -200,7 +195,7 @@ export function WorkSection() {
                 >
                   <Link href={`/portfolio/${project.slug}`} className="block">
                     <div className="relative aspect-[3/4] w-[260px] sm:w-[350px] overflow-hidden bg-muted lg:w-[450px]">
-                      <Image
+                      <img
                         src={project.image_url || '/images/placeholder.jpg'}
                         alt={project.title}
                         fill

@@ -1,7 +1,6 @@
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { useRef, useEffect, useState } from 'react'
 import { SectionLabel } from '@/components/section-label'
-import { createClient } from '@/lib/supabase/client'
 
 type PortfolioItem = {
   id: string

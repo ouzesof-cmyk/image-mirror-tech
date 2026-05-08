@@ -10,33 +10,43 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PortfolioAdCampaignsRouteImport } from './routes/portfolio.ad-campaigns'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PortfolioAdCampaignsRoute = PortfolioAdCampaignsRouteImport.update({
+  id: '/portfolio/ad-campaigns',
+  path: '/portfolio/ad-campaigns',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/portfolio/ad-campaigns': typeof PortfolioAdCampaignsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/portfolio/ad-campaigns': typeof PortfolioAdCampaignsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/portfolio/ad-campaigns': typeof PortfolioAdCampaignsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/portfolio/ad-campaigns'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/portfolio/ad-campaigns'
+  id: '__root__' | '/' | '/portfolio/ad-campaigns'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  PortfolioAdCampaignsRoute: typeof PortfolioAdCampaignsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,12 +58,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/portfolio/ad-campaigns': {
+      id: '/portfolio/ad-campaigns'
+      path: '/portfolio/ad-campaigns'
+      fullPath: '/portfolio/ad-campaigns'
+      preLoaderRoute: typeof PortfolioAdCampaignsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  PortfolioAdCampaignsRoute: PortfolioAdCampaignsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

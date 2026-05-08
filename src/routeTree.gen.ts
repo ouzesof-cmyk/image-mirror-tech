@@ -10,11 +10,36 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PortfolioWebDevelopmentRouteImport } from './routes/portfolio.web-development'
+import { Route as PortfolioVideoProductionRouteImport } from './routes/portfolio.video-production'
+import { Route as PortfolioPhotographyRouteImport } from './routes/portfolio.photography'
+import { Route as PortfolioGraphicDesignRouteImport } from './routes/portfolio.graphic-design'
 import { Route as PortfolioAdCampaignsRouteImport } from './routes/portfolio.ad-campaigns'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PortfolioWebDevelopmentRoute = PortfolioWebDevelopmentRouteImport.update({
+  id: '/portfolio/web-development',
+  path: '/portfolio/web-development',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PortfolioVideoProductionRoute =
+  PortfolioVideoProductionRouteImport.update({
+    id: '/portfolio/video-production',
+    path: '/portfolio/video-production',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const PortfolioPhotographyRoute = PortfolioPhotographyRouteImport.update({
+  id: '/portfolio/photography',
+  path: '/portfolio/photography',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PortfolioGraphicDesignRoute = PortfolioGraphicDesignRouteImport.update({
+  id: '/portfolio/graphic-design',
+  path: '/portfolio/graphic-design',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PortfolioAdCampaignsRoute = PortfolioAdCampaignsRouteImport.update({
@@ -26,27 +51,62 @@ const PortfolioAdCampaignsRoute = PortfolioAdCampaignsRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/portfolio/ad-campaigns': typeof PortfolioAdCampaignsRoute
+  '/portfolio/graphic-design': typeof PortfolioGraphicDesignRoute
+  '/portfolio/photography': typeof PortfolioPhotographyRoute
+  '/portfolio/video-production': typeof PortfolioVideoProductionRoute
+  '/portfolio/web-development': typeof PortfolioWebDevelopmentRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/portfolio/ad-campaigns': typeof PortfolioAdCampaignsRoute
+  '/portfolio/graphic-design': typeof PortfolioGraphicDesignRoute
+  '/portfolio/photography': typeof PortfolioPhotographyRoute
+  '/portfolio/video-production': typeof PortfolioVideoProductionRoute
+  '/portfolio/web-development': typeof PortfolioWebDevelopmentRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/portfolio/ad-campaigns': typeof PortfolioAdCampaignsRoute
+  '/portfolio/graphic-design': typeof PortfolioGraphicDesignRoute
+  '/portfolio/photography': typeof PortfolioPhotographyRoute
+  '/portfolio/video-production': typeof PortfolioVideoProductionRoute
+  '/portfolio/web-development': typeof PortfolioWebDevelopmentRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/portfolio/ad-campaigns'
+  fullPaths:
+    | '/'
+    | '/portfolio/ad-campaigns'
+    | '/portfolio/graphic-design'
+    | '/portfolio/photography'
+    | '/portfolio/video-production'
+    | '/portfolio/web-development'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/portfolio/ad-campaigns'
-  id: '__root__' | '/' | '/portfolio/ad-campaigns'
+  to:
+    | '/'
+    | '/portfolio/ad-campaigns'
+    | '/portfolio/graphic-design'
+    | '/portfolio/photography'
+    | '/portfolio/video-production'
+    | '/portfolio/web-development'
+  id:
+    | '__root__'
+    | '/'
+    | '/portfolio/ad-campaigns'
+    | '/portfolio/graphic-design'
+    | '/portfolio/photography'
+    | '/portfolio/video-production'
+    | '/portfolio/web-development'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PortfolioAdCampaignsRoute: typeof PortfolioAdCampaignsRoute
+  PortfolioGraphicDesignRoute: typeof PortfolioGraphicDesignRoute
+  PortfolioPhotographyRoute: typeof PortfolioPhotographyRoute
+  PortfolioVideoProductionRoute: typeof PortfolioVideoProductionRoute
+  PortfolioWebDevelopmentRoute: typeof PortfolioWebDevelopmentRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -56,6 +116,34 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portfolio/web-development': {
+      id: '/portfolio/web-development'
+      path: '/portfolio/web-development'
+      fullPath: '/portfolio/web-development'
+      preLoaderRoute: typeof PortfolioWebDevelopmentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portfolio/video-production': {
+      id: '/portfolio/video-production'
+      path: '/portfolio/video-production'
+      fullPath: '/portfolio/video-production'
+      preLoaderRoute: typeof PortfolioVideoProductionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portfolio/photography': {
+      id: '/portfolio/photography'
+      path: '/portfolio/photography'
+      fullPath: '/portfolio/photography'
+      preLoaderRoute: typeof PortfolioPhotographyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portfolio/graphic-design': {
+      id: '/portfolio/graphic-design'
+      path: '/portfolio/graphic-design'
+      fullPath: '/portfolio/graphic-design'
+      preLoaderRoute: typeof PortfolioGraphicDesignRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/portfolio/ad-campaigns': {
@@ -71,6 +159,10 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PortfolioAdCampaignsRoute: PortfolioAdCampaignsRoute,
+  PortfolioGraphicDesignRoute: PortfolioGraphicDesignRoute,
+  PortfolioPhotographyRoute: PortfolioPhotographyRoute,
+  PortfolioVideoProductionRoute: PortfolioVideoProductionRoute,
+  PortfolioWebDevelopmentRoute: PortfolioWebDevelopmentRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

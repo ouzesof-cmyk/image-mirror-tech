@@ -132,7 +132,7 @@ export function WorkSection() {
                       <img
                         src={project.image_url || '/images/placeholder.jpg'}
                         alt={project.title}
-                        fill
+                        style={{position:"absolute",inset:0,width:"100%",height:"100%"}}
                         className="object-cover transition-transform duration-700 group-hover:scale-105"
                         sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw"
                       />
@@ -173,7 +173,7 @@ export function WorkSection() {
                       <img
                         src={project.image_url || '/images/placeholder.jpg'}
                         alt={project.title}
-                        fill
+                        style={{position:"absolute",inset:0,width:"100%",height:"100%"}}
                         className="object-cover transition-transform duration-700 group-hover:scale-105"
                         sizes="(max-width: 640px) 260px, (max-width: 1024px) 350px, 450px"
                       />

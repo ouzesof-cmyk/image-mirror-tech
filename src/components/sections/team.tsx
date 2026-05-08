@@ -63,7 +63,7 @@ export function TeamSection() {
                 <img
                   src={member.image}
                   alt={member.name}
-                  fill
+                  style={{position:"absolute",inset:0,width:"100%",height:"100%"}}
                   className="object-cover grayscale transition-all duration-700 group-hover:scale-105 group-hover:grayscale-0"
                   sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
                 />

@@ -74,31 +74,7 @@ export function WorkSection() {
   const x = useTransform(scrollYProgress, [0, 1], ['0%', '-60%'])
 
   useEffect(() => {
-    async function fetchProjects() {
-      try {
-        const supabase = createClient()
-        const { data, error } = await supabase
-          .from('portfolio_items')
-          .select('id, title, subtitle, image_url, slug, display_order, display_mode')
-          .eq('is_visible', true)
-          .order('display_order', { ascending: true })
-
-        if (error) {
-          console.error('Error fetching portfolio items:', error)
-          return
-        }
-
-        if (data && data.length > 0) {
-          setProjects(data)
-        }
-      } catch (error) {
-        console.error('Error:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchProjects()
+    setLoading(false)
   }, [])
 
   const carouselItems = projects.filter(p => p.display_mode === 'carousel' || p.display_mode === 'both')

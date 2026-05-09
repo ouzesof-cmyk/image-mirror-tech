@@ -21,9 +21,16 @@ interface Item {
 }
 
 export function PortfolioPage({ title, tag, titleKey }: PortfolioPageProps) {
-  const { t, isRTL, language } = useLanguage()
-  const localizedTitle = typeof titleKey === 'number' ? t.work.projects[titleKey]?.title ?? title : title
+  const { isRTL, language } = useLanguage()
+  void titleKey
+  const localizedTitle = title
   const ArrowBack = isRTL ? ArrowRight : ArrowLeft
+  const tr = {
+    back: isRTL ? 'رجوع' : 'Back',
+    label: isRTL ? 'معرض الأعمال' : 'Portfolio',
+    empty: isRTL ? 'لا توجد عناصر بعد' : 'No items yet',
+    soon: isRTL ? 'قريباً' : 'Coming soon',
+  }
   const [items, setItems] = useState<Item[] | null>(null)
 
   useEffect(() => {
@@ -47,12 +54,12 @@ export function PortfolioPage({ title, tag, titleKey }: PortfolioPageProps) {
           className={`fixed top-8 z-50 inline-flex items-center gap-2 text-sm text-white/60 transition-colors hover:text-white ${isRTL ? 'right-6 flex-row-reverse' : 'left-6'}`}
         >
           <ArrowBack className="h-4 w-4" />
-          {t.portfolio.back}
+          {tr.back}
         </a>
 
         <section className="px-6 pt-32 pb-12">
           <div className="mx-auto max-w-7xl text-center">
-            <p className="text-sm text-white/40">{t.portfolio.label}</p>
+            <p className="text-sm text-white/40">{tr.label}</p>
             <h1 className="mt-4 font-serif text-5xl text-white md:text-7xl">{localizedTitle}</h1>
           </div>
         </section>
@@ -65,10 +72,10 @@ export function PortfolioPage({ title, tag, titleKey }: PortfolioPageProps) {
               </div>
             ) : items.length === 0 ? (
               <div className="py-20 text-center">
-                <p className="mx-auto max-w-md text-sm text-white/50">{t.portfolio.empty}</p>
+                <p className="mx-auto max-w-md text-sm text-white/50">{tr.empty}</p>
                 <div className="mt-8 inline-flex items-center gap-3 text-white/40">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  <span className="text-xs">{t.portfolio.soon}</span>
+                  <span className="text-xs">{tr.soon}</span>
                 </div>
               </div>
             ) : (

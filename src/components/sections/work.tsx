@@ -16,10 +16,28 @@ interface CarouselItem {
   media_type: string
 }
 
+const fallbackProjectsData = [
+  { title: 'Graphic Design', subtitle: 'Visual Identity' },
+  { title: 'Video Production', subtitle: 'Cinematic Storytelling' },
+  { title: 'Ad Campaigns', subtitle: 'Brand Strategy' },
+  { title: 'Web Development', subtitle: 'Digital Experiences' },
+  { title: 'Photography', subtitle: 'Light & Composition' },
+]
+
 export function WorkSection() {
-  const { t, isRTL, language } = useLanguage()
+  const { isRTL, language } = useLanguage()
   const containerRef = useRef<HTMLDivElement>(null)
   const [dynamicItems, setDynamicItems] = useState<CarouselItem[] | null>(null)
+
+  const tr = {
+    label: isRTL ? 'أعمالنا' : 'Our Work',
+    code: 'WRK/05',
+    title: isRTL ? 'مشاريع مختارة' : 'Selected Projects',
+    paragraph: isRTL
+      ? 'مجموعة مختارة من أعمالنا الإبداعية عبر مختلف التخصصات.'
+      : 'A curated selection of our creative work across disciplines.',
+    seeWorks: isRTL ? 'شاهد المزيد' : 'See all works',
+  }
 
   useEffect(() => {
     supabase
@@ -32,9 +50,9 @@ export function WorkSection() {
           setDynamicItems(
             data.map((d) => ({
               id: d.id,
-              title: language === 'ar' ? d.title_ar : language === 'fr' ? d.title_fr : d.title_en,
+              title: (language === 'ar' ? d.title_ar : language === 'fr' ? d.title_fr : d.title_en) ?? '',
               subtitle: d.category,
-              image_url: d.media_url,
+              image_url: d.media_url ?? '',
               slug: d.category,
               media_type: d.media_type,
             }))
@@ -45,7 +63,7 @@ export function WorkSection() {
       })
   }, [language])
 
-  const fallbackProjects = t.work.projects.map((p, i) => ({
+  const fallbackProjects: CarouselItem[] = fallbackProjectsData.map((p, i) => ({
     id: String(i + 1),
     title: p.title,
     subtitle: p.subtitle,

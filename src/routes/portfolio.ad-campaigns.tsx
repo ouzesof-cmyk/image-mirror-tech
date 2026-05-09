@@ -10,5 +10,5 @@ export const Route = createFileRoute("/portfolio/ad-campaigns")({
       { property: "og:description", content: "Ad Campaigns portfolio by OUZESOF creative agency." },
     ],
   }),
-  component: () => <PortfolioPage title="Ad Campaigns" tag="ad-campaigns" />,
+  component: () => <PortfolioPage title="ad-campaigns" tag="ad-campaigns" titleKey={2} />,
 });

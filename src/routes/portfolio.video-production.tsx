@@ -10,5 +10,5 @@ export const Route = createFileRoute("/portfolio/video-production")({
       { property: "og:description", content: "Video Production portfolio by OUZESOF creative agency." },
     ],
   }),
-  component: () => <PortfolioPage title="Video Production" tag="video-production" />,
+  component: () => <PortfolioPage title="video-production" tag="video-production" titleKey={1} />,
 });

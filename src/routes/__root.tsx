@@ -10,9 +10,11 @@ import {
 
 import appCss from "../styles.css?url";
 import { LanguageProvider } from "@/lib/language-context";
+import { AuthProvider } from "@/lib/auth";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import { CustomCursor } from "@/components/custom-cursor";
 import { PageLoader } from "@/components/page-loader";
+import { useRouterState } from "@tanstack/react-router";
 
 function NotFoundComponent() {
   return (
@@ -94,7 +96,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Cairo:wght@300;400;500;600;700;800&family=Tajawal:wght@300;400;500;700;800&display=swap",
       },
       { rel: "icon", href: "/icon.svg", type: "image/svg+xml" },
       { rel: "apple-touch-icon", href: "/apple-icon.png" },
@@ -122,15 +124,25 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isAdminArea = pathname.startsWith("/admin") || pathname.startsWith("/login");
   return (
     <QueryClientProvider client={queryClient}>
-      <LanguageProvider>
-        <PageLoader />
-        <CustomCursor />
-        <SmoothScroll>
-          <Outlet />
-        </SmoothScroll>
-      </LanguageProvider>
+      <AuthProvider>
+        <LanguageProvider>
+          {isAdminArea ? (
+            <Outlet />
+          ) : (
+            <>
+              <PageLoader />
+              <CustomCursor />
+              <SmoothScroll>
+                <Outlet />
+              </SmoothScroll>
+            </>
+          )}
+        </LanguageProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

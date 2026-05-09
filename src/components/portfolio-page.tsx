@@ -21,9 +21,16 @@ interface Item {
 }
 
 export function PortfolioPage({ title, tag, titleKey }: PortfolioPageProps) {
-  const { t, isRTL, language } = useLanguage()
-  const localizedTitle = typeof titleKey === 'number' ? t.work.projects[titleKey]?.title ?? title : title
+  const { isRTL, language } = useLanguage()
+  void titleKey
+  const localizedTitle = title
   const ArrowBack = isRTL ? ArrowRight : ArrowLeft
+  const tr = {
+    back: isRTL ? 'رجوع' : 'Back',
+    label: isRTL ? 'معرض الأعمال' : 'Portfolio',
+    empty: isRTL ? 'لا توجد عناصر بعد' : 'No items yet',
+    soon: isRTL ? 'قريباً' : 'Coming soon',
+  }
   const [items, setItems] = useState<Item[] | null>(null)
 
   useEffect(() => {

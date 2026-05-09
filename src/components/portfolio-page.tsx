@@ -1,14 +1,15 @@
-import { Loader2, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/sections/footer";
 
 interface PortfolioPageProps {
   title: string;
   tag: string;
+  image?: string;
+  subtitle?: string;
 }
 
-export function PortfolioPage({ title }: PortfolioPageProps) {
-  // Phase 1: Supabase data not wired yet. Render empty state.
+export function PortfolioPage({ title, image, subtitle }: PortfolioPageProps) {
   return (
     <>
       <Navigation />
@@ -21,20 +22,27 @@ export function PortfolioPage({ title }: PortfolioPageProps) {
           BACK
         </a>
 
-        <section className="flex min-h-screen items-center justify-center px-6">
-          <div className="text-center">
+        <section className="relative min-h-screen px-6 pt-32 pb-20">
+          <div className="mx-auto max-w-6xl">
             <p className="text-sm tracking-[0.2em] text-white/40">PORTFOLIO</p>
             <h1 className="mt-4 font-serif text-5xl text-white md:text-7xl">
               {title}
             </h1>
-            <p className="mx-auto mt-8 max-w-md text-sm leading-relaxed text-white/50">
-              Projects in this category will appear here once the content
-              management system is connected.
-            </p>
-            <div className="mt-12 inline-flex items-center gap-3 text-white/40">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span className="text-xs tracking-[0.2em]">COMING SOON</span>
-            </div>
+            {subtitle && (
+              <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/50">
+                {subtitle}
+              </p>
+            )}
+
+            {image && (
+              <div className="mt-12 overflow-hidden">
+                <img
+                  src={image}
+                  alt={title}
+                  className="h-auto w-full object-cover"
+                />
+              </div>
+            )}
           </div>
         </section>
       </main>

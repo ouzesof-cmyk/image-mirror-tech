@@ -84,7 +84,7 @@ export function WorkSection() {
     <section id="work" className="bg-background-secondary" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="px-4 sm:px-6 py-12 sm:py-20">
         <div className="mx-auto max-w-7xl">
-          <SectionLabel japanese={t.work.label} code={t.work.code} title={t.work.title} />
+          <SectionLabel japanese={tr.label} code={tr.code} title={tr.title} />
 
           <div className="grid gap-4 sm:gap-8 lg:grid-cols-2">
             <motion.p
@@ -94,14 +94,14 @@ export function WorkSection() {
               transition={{ duration: 0.6 }}
               className={`text-sm sm:text-base leading-relaxed text-foreground-secondary ${isRTL ? 'text-right' : ''}`}
             >
-              {t.work.paragraph}
+              {tr.paragraph}
             </motion.p>
 
             <div className={`flex items-start ${isRTL ? 'lg:justify-start' : 'lg:justify-end'}`}>
               <a href="#work"
                 className={`group inline-flex items-center gap-2 text-xs sm:text-sm text-foreground transition-colors hover:text-accent-gold ${isRTL ? 'flex-row-reverse' : ''}`}
               >
-                {t.work.seeWorks}
+                {tr.seeWorks}
                 <span className={`transition-transform ${isRTL ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`}>→</span>
               </a>
             </div>

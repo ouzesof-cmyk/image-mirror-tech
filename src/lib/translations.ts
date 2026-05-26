@@ -1,5 +1,4 @@
 export type Language = 'en' | 'fr' | 'ar'
-
 export const translations = {
   en: {
     // Navigation
@@ -404,5 +403,4 @@ export const translations = {
     },
   },
 } as const
-
 export type Translations = typeof translations.en

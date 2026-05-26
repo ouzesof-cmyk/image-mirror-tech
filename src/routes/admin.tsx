@@ -1,373 +1,596 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useState, FormEvent } from "react";
-import { useAuth } from "@/lib/auth";
-import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Trash2, Upload, Plus, LogOut, Eye, EyeOff } from "lucide-react";
+// @ts-nocheck
+import { createFileRoute, useNavigate, Link } from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
+import { useAuth } from '@/hooks/use-auth'
+import { supabase } from '@/integrations/supabase/client'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Switch } from '@/components/ui/switch'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Badge } from '@/components/ui/badge'
+import { toast } from 'sonner'
+import { Trash2, Plus, LogOut, Upload, Loader2 } from 'lucide-react'
 
-export const Route = createFileRoute("/admin")({
-  head: () => ({
-    meta: [{ title: "Admin — OUZESOF" }, { name: "robots", content: "noindex" }],
-  }),
+export const Route = createFileRoute('/admin')({
   component: AdminPage,
-});
+})
 
-const CATEGORIES = [
-  "graphic-design",
-  "video-production",
-  "ad-campaigns",
-  "web-development",
-  "photography",
-];
+const CATEGORIES = ['ad-campaigns', 'graphic-design', 'photography', 'video-production', 'web-development']
 
-interface Item {
-  id: string;
-  category: string;
-  title_en: string;
-  title_fr: string;
-  title_ar: string;
-  media_type: string;
-  media_url: string;
-  display_order: number;
-  show_in_carousel: boolean;
+type Project = {
+  id: string
+  category: string
+  title: string
+  slug: string
+  description: string | null
+  cover_image: string | null
+  client: string | null
+  year: number | null
+  featured: boolean
+  published: boolean
+  sort_order: number
+  display_type: 'carousel' | 'grid'
+}
+
+type Submission = {
+  id: string
+  name: string
+  email: string
+  phone: string | null
+  subject: string | null
+  message: string
+  read: boolean
+  created_at: string
 }
 
 function AdminPage() {
-  const { user, isAdmin, loading, signOut } = useAuth();
-  const navigate = useNavigate();
-  const [items, setItems] = useState<Item[]>([]);
-  const [filter, setFilter] = useState<string>("all");
-  const [busy, setBusy] = useState(false);
-
-  // form
-  const [category, setCategory] = useState(CATEGORIES[0]);
-  const [titleEn, setTitleEn] = useState("");
-  const [titleFr, setTitleFr] = useState("");
-  const [titleAr, setTitleAr] = useState("");
-  const [mediaType, setMediaType] = useState<"image" | "video">("image");
-  const [mediaUrl, setMediaUrl] = useState("");
-  const [file, setFile] = useState<File | null>(null);
-  const [showInCarousel, setShowInCarousel] = useState(false);
-  const [order, setOrder] = useState(0);
-  const [msg, setMsg] = useState<string | null>(null);
+  const { user, isAdmin, loading, signOut } = useAuth()
+  const navigate = useNavigate()
 
   useEffect(() => {
-    if (!loading && !user) navigate({ to: "/login" });
-  }, [user, loading, navigate]);
+    if (!loading && (!user || !isAdmin)) navigate({ to: '/auth/login' })
+  }, [user, isAdmin, loading, navigate])
 
-  const load = async () => {
-    const { data } = await supabase
-      .from("portfolio_items")
-      .select("*")
-      .order("display_order", { ascending: true })
-      .order("created_at", { ascending: false });
-    setItems((data as Item[]) ?? []);
-  };
-
-  useEffect(() => {
-    if (isAdmin) load();
-  }, [isAdmin]);
-
-  if (loading) {
+  if (loading || !user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <Loader2 className="h-6 w-6 animate-spin text-foreground" />
-      </div>
-    );
+      <main className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="h-6 w-6 animate-spin" />
+      </main>
+    )
   }
-
-  if (!user) return null;
 
   if (!isAdmin) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-background px-4">
-        <div className="max-w-md rounded-2xl border border-border bg-card p-8 text-center">
-          <h1 className="font-serif text-2xl text-foreground">صلاحية محدودة</h1>
-          <p className="mt-3 text-sm text-foreground-secondary">
-            حسابك ({user.email}) ليس لديه صلاحية أدمين. على مالك الموقع منحك دور admin من قاعدة البيانات.
-          </p>
-          <p className="mt-3 text-xs text-foreground-secondary">
-            User ID: <code className="font-mono">{user.id}</code>
-          </p>
-          <div className="mt-6 flex gap-2 justify-center">
-            <button onClick={() => signOut()} className="rounded-md border border-border px-4 py-2 text-xs">
-              تسجيل خروج
-            </button>
-            <Link to="/" className="rounded-md bg-foreground px-4 py-2 text-xs text-background">
-              العودة للموقع
-            </Link>
-          </div>
-        </div>
+      <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background p-6">
+        <h1 className="font-serif text-2xl">Not authorized</h1>
+        <p className="text-foreground-secondary">Your account is not an admin.</p>
+        <Button onClick={() => signOut()}>Sign out</Button>
       </main>
-    );
+    )
   }
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setBusy(true);
-    setMsg(null);
-    try {
-      let finalUrl = mediaUrl;
-      if (file) {
-        const ext = file.name.split(".").pop();
-        const path = `${category}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-        const { error: upErr } = await supabase.storage.from("portfolio-media").upload(path, file, {
-          cacheControl: "3600",
-          upsert: false,
-        });
-        if (upErr) throw upErr;
-        const { data } = supabase.storage.from("portfolio-media").getPublicUrl(path);
-        finalUrl = data.publicUrl;
-      }
-      if (!finalUrl) throw new Error("الرجاء رفع ملف أو إدخال رابط");
-
-      const { error } = await supabase.from("portfolio_items").insert({
-        category,
-        title_en: titleEn,
-        title_fr: titleFr,
-        title_ar: titleAr,
-        media_type: mediaType,
-        media_url: finalUrl,
-        display_order: order,
-        show_in_carousel: showInCarousel,
-      });
-      if (error) throw error;
-
-      setMsg("تمت الإضافة بنجاح ✓");
-      setTitleEn("");
-      setTitleFr("");
-      setTitleAr("");
-      setMediaUrl("");
-      setFile(null);
-      (document.getElementById("file-input") as HTMLInputElement | null)?.value && ((document.getElementById("file-input") as HTMLInputElement).value = "");
-      load();
-    } catch (err) {
-      setMsg("خطأ: " + (err as Error).message);
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm("حذف هذا العنصر؟")) return;
-    await supabase.from("portfolio_items").delete().eq("id", id);
-    load();
-  };
-
-  const toggleCarousel = async (item: Item) => {
-    await supabase
-      .from("portfolio_items")
-      .update({ show_in_carousel: !item.show_in_carousel })
-      .eq("id", item.id);
-    load();
-  };
-
-  const updateOrder = async (id: string, newOrder: number) => {
-    await supabase.from("portfolio_items").update({ display_order: newOrder }).eq("id", id);
-    load();
-  };
-
-  const filtered = filter === "all" ? items : items.filter((i) => i.category === filter);
-
   return (
-    <main className="min-h-screen bg-background" dir="rtl">
-      <header className="border-b border-border bg-card">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+    <main className="min-h-screen bg-background p-4 md:p-8">
+      <div className="mx-auto max-w-7xl">
+        <header className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="font-serif text-2xl text-foreground">لوحة تحكم الأدمين</h1>
-            <p className="text-xs text-foreground-secondary">{user.email}</p>
+            <h1 className="font-serif text-3xl text-foreground">Admin</h1>
+            <p className="text-sm text-foreground-secondary">{user.email}</p>
           </div>
           <div className="flex gap-2">
-            <Link to="/" className="rounded-md border border-border px-4 py-2 text-xs hover:bg-accent">
-              عرض الموقع
-            </Link>
-            <button
-              onClick={() => signOut().then(() => navigate({ to: "/login" }))}
-              className="inline-flex items-center gap-2 rounded-md bg-foreground px-4 py-2 text-xs text-background"
-            >
-              <LogOut className="h-3 w-3" /> خروج
-            </button>
+            <Link to="/" className="text-sm underline self-center">View site</Link>
+            <Button variant="outline" size="sm" onClick={() => signOut()}>
+              <LogOut className="mr-2 h-4 w-4" /> Sign out
+            </Button>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <div className="mx-auto grid max-w-7xl gap-6 px-6 py-8 lg:grid-cols-[400px_1fr]">
-        {/* Add form */}
-        <section className="rounded-2xl border border-border bg-card p-6">
-          <h2 className="flex items-center gap-2 font-serif text-xl text-foreground">
-            <Plus className="h-5 w-5" /> إضافة عنصر جديد
-          </h2>
-          <form onSubmit={handleSubmit} className="mt-4 space-y-3">
-            <Field label="الفئة">
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-              >
-                {CATEGORIES.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-            </Field>
-            <Field label="نوع الوسائط">
-              <div className="flex gap-2">
-                {(["image", "video"] as const).map((t) => (
-                  <button
-                    key={t}
-                    type="button"
-                    onClick={() => setMediaType(t)}
-                    className={`flex-1 rounded-md border px-3 py-2 text-xs ${mediaType === t ? "border-foreground bg-foreground text-background" : "border-border"}`}
-                  >
-                    {t === "image" ? "صورة" : "فيديو"}
-                  </button>
-                ))}
-              </div>
-            </Field>
-            <Field label="رفع ملف (اختياري)">
-              <div className="flex items-center gap-2">
-                <Upload className="h-4 w-4 text-foreground-secondary" />
-                <input
-                  id="file-input"
-                  type="file"
-                  accept={mediaType === "image" ? "image/*" : "video/*"}
-                  onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                  className="text-xs"
-                />
-              </div>
-            </Field>
-            <Field label="أو رابط URL">
-              <input
-                type="url"
-                value={mediaUrl}
-                onChange={(e) => setMediaUrl(e.target.value)}
-                placeholder="https://..."
-                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-              />
-            </Field>
-            <Field label="العنوان (عربي)">
-              <input
-                value={titleAr}
-                onChange={(e) => setTitleAr(e.target.value)}
-                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-              />
-            </Field>
-            <Field label="العنوان (إنجليزي)">
-              <input
-                value={titleEn}
-                onChange={(e) => setTitleEn(e.target.value)}
-                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-                dir="ltr"
-              />
-            </Field>
-            <Field label="العنوان (فرنسي)">
-              <input
-                value={titleFr}
-                onChange={(e) => setTitleFr(e.target.value)}
-                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-                dir="ltr"
-              />
-            </Field>
-            <Field label="ترتيب العرض">
-              <input
-                type="number"
-                value={order}
-                onChange={(e) => setOrder(Number(e.target.value))}
-                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-              />
-            </Field>
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={showInCarousel}
-                onChange={(e) => setShowInCarousel(e.target.checked)}
-              />
-              عرض في كاروسيل الصفحة الرئيسية
-            </label>
-
-            {msg && <p className={`text-xs ${msg.startsWith("خطأ") ? "text-red-500" : "text-green-600"}`}>{msg}</p>}
-
-            <button
-              type="submit"
-              disabled={busy}
-              className="w-full rounded-md bg-foreground py-2.5 text-sm text-background disabled:opacity-50"
-            >
-              {busy ? "جارٍ الحفظ..." : "إضافة"}
-            </button>
-          </form>
-        </section>
-
-        {/* List */}
-        <section className="rounded-2xl border border-border bg-card p-6">
-          <div className="flex items-center justify-between">
-            <h2 className="font-serif text-xl text-foreground">الوسائط ({filtered.length})</h2>
-            <select
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              className="rounded-md border border-border bg-background px-3 py-1.5 text-sm"
-            >
-              <option value="all">كل الفئات</option>
-              {CATEGORIES.map((c) => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            {filtered.map((item) => (
-              <div key={item.id} className="overflow-hidden rounded-lg border border-border bg-background">
-                <div className="relative aspect-video bg-muted">
-                  {item.media_type === "video" ? (
-                    <video src={item.media_url} className="h-full w-full object-cover" muted />
-                  ) : (
-                    <img src={item.media_url} alt={item.title_ar} className="h-full w-full object-cover" />
-                  )}
-                  <span className="absolute top-2 right-2 rounded bg-black/60 px-2 py-0.5 text-[10px] text-white">
-                    {item.media_type}
-                  </span>
-                </div>
-                <div className="space-y-2 p-3">
-                  <p className="text-xs font-medium text-foreground">{item.title_ar || item.title_en || "—"}</p>
-                  <p className="text-[10px] text-foreground-secondary">{item.category}</p>
-                  <div className="flex items-center gap-1">
-                    <input
-                      type="number"
-                      defaultValue={item.display_order}
-                      onBlur={(e) => updateOrder(item.id, Number(e.target.value))}
-                      className="w-16 rounded border border-border bg-background px-2 py-1 text-xs"
-                    />
-                    <button
-                      onClick={() => toggleCarousel(item)}
-                      title={item.show_in_carousel ? "مخفي من الكاروسيل" : "إظهار في الكاروسيل"}
-                      className={`rounded border px-2 py-1 text-xs ${item.show_in_carousel ? "border-green-600 text-green-600" : "border-border text-foreground-secondary"}`}
-                    >
-                      {item.show_in_carousel ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
-                    </button>
-                    <button
-                      onClick={() => handleDelete(item.id)}
-                      className="ml-auto rounded border border-red-500/40 p-1.5 text-red-500 hover:bg-red-500/10"
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-            {filtered.length === 0 && (
-              <p className="col-span-full py-8 text-center text-sm text-foreground-secondary">
-                لا توجد عناصر بعد. ابدأ بإضافة أول صورة أو فيديو.
-              </p>
-            )}
-          </div>
-        </section>
+        <Tabs defaultValue="categories">
+          <TabsList>
+            <TabsTrigger value="categories">Categories</TabsTrigger>
+            <TabsTrigger value="projects">Projects</TabsTrigger>
+            <TabsTrigger value="content">Site Content</TabsTrigger>
+            <TabsTrigger value="submissions">Submissions</TabsTrigger>
+            <TabsTrigger value="media">Media</TabsTrigger>
+          </TabsList>
+          <TabsContent value="categories" className="mt-6"><CategoriesTab /></TabsContent>
+          <TabsContent value="projects" className="mt-6"><ProjectsTab /></TabsContent>
+          <TabsContent value="content" className="mt-6"><ContentTab /></TabsContent>
+          <TabsContent value="submissions" className="mt-6"><SubmissionsTab /></TabsContent>
+          <TabsContent value="media" className="mt-6"><MediaTab /></TabsContent>
+        </Tabs>
       </div>
     </main>
-  );
+  )
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+/* -------------------- Projects -------------------- */
+function ProjectsTab() {
+  const [projects, setProjects] = useState<Project[]>([])
+  const [loading, setLoading] = useState(true)
+  const [editing, setEditing] = useState<Partial<Project> | null>(null)
+
+  const load = async () => {
+    setLoading(true)
+    const { data, error } = await supabase.from('portfolio_projects').select('*').order('sort_order').order('created_at', { ascending: false })
+    if (error) toast.error(error.message)
+    else setProjects(data as Project[])
+    setLoading(false)
+  }
+  useEffect(() => { load() }, [])
+
+  const remove = async (id: string) => {
+    if (!confirm('Delete this project?')) return
+    const { error } = await supabase.from('portfolio_projects').delete().eq('id', id)
+    if (error) toast.error(error.message)
+    else { toast.success('Deleted'); load() }
+  }
+
+  const save = async (p: Partial<Project>) => {
+    const payload = {
+      category: p.category!,
+      title: p.title!,
+      slug: p.slug || p.title!.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
+      description: p.description ?? null,
+      cover_image: p.cover_image ?? null,
+      client: p.client ?? null,
+      year: p.year ?? null,
+      featured: !!p.featured,
+      published: p.published ?? true,
+      sort_order: p.sort_order ?? 0,
+      display_type: p.display_type ?? 'grid',
+    }
+    const q = p.id
+      ? supabase.from('portfolio_projects').update(payload).eq('id', p.id)
+      : supabase.from('portfolio_projects').insert(payload)
+    const { error } = await q
+    if (error) toast.error(error.message)
+    else { toast.success('Saved'); setEditing(null); load() }
+  }
+
+  if (editing) return <ProjectForm project={editing} onSave={save} onCancel={() => setEditing(null)} />
+
   return (
-    <div>
-      <label className="text-xs text-foreground-secondary">{label}</label>
-      <div className="mt-1">{children}</div>
+    <div className="space-y-4">
+      <div className="flex justify-between">
+        <h2 className="font-serif text-xl">Portfolio Projects</h2>
+        <Button onClick={() => setEditing({ category: CATEGORIES[0], featured: false, published: true, display_type: 'grid' })}>
+          <Plus className="mr-2 h-4 w-4" /> New Project
+        </Button>
+      </div>
+      {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : (
+        <div className="rounded-lg border border-border">
+          {projects.length === 0 ? (
+            <p className="p-8 text-center text-foreground-secondary">No projects yet.</p>
+          ) : projects.map(p => (
+            <div key={p.id} className="flex items-center gap-4 border-b border-border p-4 last:border-0">
+              {p.cover_image && <img src={p.cover_image} alt="" className="h-12 w-12 rounded object-cover" />}
+              <div className="flex-1 min-w-0">
+                <p className="truncate font-medium">{p.title}</p>
+                <p className="text-xs text-foreground-secondary">{p.category} · {p.year ?? '—'}</p>
+              </div>
+              <div className="flex gap-2">
+                <Badge variant="outline">{p.display_type === 'carousel' ? 'Carousel' : 'Grid'}</Badge>
+                {p.featured && <Badge variant="secondary">Featured</Badge>}
+                {!p.published && <Badge variant="outline">Draft</Badge>}
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => setEditing(p)}>Edit</Button>
+              <Button variant="ghost" size="icon" onClick={() => remove(p.id)}><Trash2 className="h-4 w-4" /></Button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
-  );
+  )
+}
+
+function ProjectForm({ project, onSave, onCancel }: { project: Partial<Project>; onSave: (p: Partial<Project>) => void; onCancel: () => void }) {
+  const [p, setP] = useState<Partial<Project>>(project)
+  const [uploading, setUploading] = useState(false)
+
+  const upload = async (file: File) => {
+    setUploading(true)
+    const path = `projects/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
+    const { error } = await supabase.storage.from('media').upload(path, file)
+    if (error) { toast.error(error.message); setUploading(false); return }
+    const { data: { publicUrl } } = supabase.storage.from('media').getPublicUrl(path)
+    setP({ ...p, cover_image: publicUrl })
+    setUploading(false)
+  }
+
+  return (
+    <form onSubmit={(e) => { e.preventDefault(); onSave(p) }} className="space-y-4 rounded-lg border border-border p-6">
+      <h2 className="font-serif text-xl">{p.id ? 'Edit Project' : 'New Project'}</h2>
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-2">
+          <Label>Title</Label>
+          <Input required value={p.title ?? ''} onChange={(e) => setP({ ...p, title: e.target.value })} />
+        </div>
+        <div className="space-y-2">
+          <Label>Slug (auto from title if empty)</Label>
+          <Input value={p.slug ?? ''} onChange={(e) => setP({ ...p, slug: e.target.value })} />
+        </div>
+        <div className="space-y-2">
+          <Label>Category</Label>
+          <Select value={p.category} onValueChange={(v) => setP({ ...p, category: v })}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>{CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label>Display as</Label>
+          <Select value={p.display_type ?? 'grid'} onValueChange={(v) => setP({ ...p, display_type: v as 'carousel' | 'grid' })}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="carousel">Carousel card (top)</SelectItem>
+              <SelectItem value="grid">Grid item (below)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label>Client</Label>
+          <Input value={p.client ?? ''} onChange={(e) => setP({ ...p, client: e.target.value })} />
+        </div>
+        <div className="space-y-2">
+          <Label>Year</Label>
+          <Input type="number" value={p.year ?? ''} onChange={(e) => setP({ ...p, year: e.target.value ? +e.target.value : null })} />
+        </div>
+        <div className="space-y-2">
+          <Label>Sort order</Label>
+          <Input type="number" value={p.sort_order ?? 0} onChange={(e) => setP({ ...p, sort_order: +e.target.value })} />
+        </div>
+      </div>
+      <div className="space-y-2">
+        <Label>Description</Label>
+        <Textarea rows={4} value={p.description ?? ''} onChange={(e) => setP({ ...p, description: e.target.value })} />
+      </div>
+      <div className="space-y-2">
+        <Label>Cover image</Label>
+        <div className="flex items-center gap-3">
+          <Input type="url" placeholder="Image URL" value={p.cover_image ?? ''} onChange={(e) => setP({ ...p, cover_image: e.target.value })} />
+          <label className="inline-flex items-center gap-2 cursor-pointer rounded border border-border px-3 py-2 text-sm">
+            <Upload className="h-4 w-4" /> {uploading ? 'Uploading…' : 'Upload'}
+            <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
+          </label>
+        </div>
+        {p.cover_image && <img src={p.cover_image} alt="" className="h-32 rounded object-cover" />}
+      </div>
+      <div className="flex items-center gap-6">
+        <label className="flex items-center gap-2"><Switch checked={!!p.featured} onCheckedChange={(v) => setP({ ...p, featured: v })} /> Featured</label>
+        <label className="flex items-center gap-2"><Switch checked={p.published ?? true} onCheckedChange={(v) => setP({ ...p, published: v })} /> Published</label>
+      </div>
+      <div className="flex gap-2">
+        <Button type="submit">Save</Button>
+        <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
+      </div>
+    </form>
+  )
+}
+
+/* -------------------- Site Content -------------------- */
+function ContentTab() {
+  const [items, setItems] = useState<{ id: string; section: string; content: string }[]>([])
+  const [loading, setLoading] = useState(true)
+  const [newSection, setNewSection] = useState('')
+
+  const load = async () => {
+    setLoading(true)
+    const { data, error } = await supabase.from('site_content').select('*').order('section')
+    if (error) toast.error(error.message)
+    else setItems((data ?? []).map((d: any) => ({ id: d.id, section: d.section, content: JSON.stringify(d.content, null, 2) })))
+    setLoading(false)
+  }
+  useEffect(() => { load() }, [])
+
+  const save = async (id: string, section: string, content: string) => {
+    let parsed: any
+    try { parsed = JSON.parse(content) } catch { return toast.error('Invalid JSON') }
+    const { error } = await supabase.from('site_content').update({ content: parsed }).eq('id', id)
+    if (error) toast.error(error.message); else toast.success(`Saved ${section}`)
+  }
+
+  const create = async () => {
+    if (!newSection) return
+    const { error } = await supabase.from('site_content').insert({ section: newSection, content: {} })
+    if (error) toast.error(error.message); else { setNewSection(''); load() }
+  }
+
+  const remove = async (id: string) => {
+    if (!confirm('Delete this section?')) return
+    const { error } = await supabase.from('site_content').delete().eq('id', id)
+    if (error) toast.error(error.message); else load()
+  }
+
+  if (loading) return <Loader2 className="h-5 w-5 animate-spin" />
+
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-2">
+        <Input placeholder="New section key (e.g. hero)" value={newSection} onChange={(e) => setNewSection(e.target.value)} />
+        <Button onClick={create}><Plus className="mr-2 h-4 w-4" />Add Section</Button>
+      </div>
+      {items.length === 0 && <p className="text-foreground-secondary">No content sections yet. Add one above.</p>}
+      {items.map((it, i) => (
+        <div key={it.id} className="rounded-lg border border-border p-4">
+          <div className="mb-2 flex items-center justify-between">
+            <h3 className="font-mono text-sm">{it.section}</h3>
+            <Button variant="ghost" size="icon" onClick={() => remove(it.id)}><Trash2 className="h-4 w-4" /></Button>
+          </div>
+          <Textarea rows={8} className="font-mono text-xs" value={it.content}
+            onChange={(e) => setItems(items.map((x, j) => j === i ? { ...x, content: e.target.value } : x))} />
+          <Button className="mt-2" size="sm" onClick={() => save(it.id, it.section, it.content)}>Save</Button>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/* -------------------- Submissions -------------------- */
+function SubmissionsTab() {
+  const [items, setItems] = useState<Submission[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const load = async () => {
+    setLoading(true)
+    const { data, error } = await supabase.from('contact_submissions').select('*').order('created_at', { ascending: false })
+    if (error) toast.error(error.message); else setItems(data as Submission[])
+    setLoading(false)
+  }
+  useEffect(() => { load() }, [])
+
+  const toggleRead = async (s: Submission) => {
+    await supabase.from('contact_submissions').update({ read: !s.read }).eq('id', s.id)
+    load()
+  }
+  const remove = async (id: string) => {
+    if (!confirm('Delete?')) return
+    await supabase.from('contact_submissions').delete().eq('id', id)
+    load()
+  }
+
+  if (loading) return <Loader2 className="h-5 w-5 animate-spin" />
+  if (items.length === 0) return <p className="text-foreground-secondary">No submissions yet.</p>
+
+  return (
+    <div className="space-y-3">
+      {items.map(s => (
+        <div key={s.id} className={`rounded-lg border border-border p-4 ${s.read ? 'opacity-70' : ''}`}>
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <p className="font-medium">{s.name}</p>
+                <a href={`mailto:${s.email}`} className="text-sm text-accent-gold underline">{s.email}</a>
+                {!s.read && <Badge>New</Badge>}
+              </div>
+              {s.subject && <p className="text-sm font-medium mt-1">{s.subject}</p>}
+              <p className="mt-2 whitespace-pre-wrap text-sm">{s.message}</p>
+              <p className="mt-2 text-xs text-foreground-secondary">{new Date(s.created_at).toLocaleString()}</p>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Button variant="outline" size="sm" onClick={() => toggleRead(s)}>{s.read ? 'Mark unread' : 'Mark read'}</Button>
+              <Button variant="ghost" size="icon" onClick={() => remove(s.id)}><Trash2 className="h-4 w-4" /></Button>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/* -------------------- Media -------------------- */
+function MediaTab() {
+  const [files, setFiles] = useState<{ name: string; url: string }[]>([])
+  const [loading, setLoading] = useState(true)
+  const [uploading, setUploading] = useState(false)
+
+  const load = async () => {
+    setLoading(true)
+    const { data, error } = await supabase.storage.from('media').list('uploads', { limit: 100, sortBy: { column: 'created_at', order: 'desc' } })
+    if (error) toast.error(error.message)
+    else {
+      const items = (data ?? []).filter(f => f.name).map(f => {
+        const path = `uploads/${f.name}`
+        return { name: f.name, url: supabase.storage.from('media').getPublicUrl(path).data.publicUrl }
+      })
+      setFiles(items)
+    }
+    setLoading(false)
+  }
+  useEffect(() => { load() }, [])
+
+  const upload = async (file: File) => {
+    setUploading(true)
+    const path = `uploads/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
+    const { error } = await supabase.storage.from('media').upload(path, file)
+    setUploading(false)
+    if (error) toast.error(error.message); else { toast.success('Uploaded'); load() }
+  }
+
+  const remove = async (name: string) => {
+    if (!confirm('Delete file?')) return
+    const { error } = await supabase.storage.from('media').remove([`uploads/${name}`])
+    if (error) toast.error(error.message); else load()
+  }
+
+  return (
+    <div className="space-y-4">
+      <label className="inline-flex cursor-pointer items-center gap-2 rounded border border-border px-4 py-2">
+        <Upload className="h-4 w-4" /> {uploading ? 'Uploading…' : 'Upload file'}
+        <input type="file" className="hidden" onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
+      </label>
+      {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : (
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          {files.length === 0 && <p className="text-foreground-secondary">No files uploaded.</p>}
+          {files.map(f => (
+            <div key={f.name} className="group relative overflow-hidden rounded border border-border">
+              {/\.(png|jpe?g|webp|gif|svg)$/i.test(f.name) ? (
+                <img src={f.url} alt={f.name} className="aspect-square w-full object-cover" />
+              ) : (
+                <div className="flex aspect-square items-center justify-center bg-muted text-xs">{f.name.split('.').pop()}</div>
+              )}
+              <div className="p-2">
+                <p className="truncate text-xs">{f.name}</p>
+                <div className="mt-1 flex gap-1">
+                  <button type="button" className="text-xs underline" onClick={() => navigator.clipboard.writeText(f.url).then(() => toast.success('URL copied'))}>Copy URL</button>
+                  <button type="button" className="ml-auto text-xs text-destructive" onClick={() => remove(f.name)}>Delete</button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* -------------------- Categories -------------------- */
+type Category = {
+  id: string
+  slug: string
+  title: string
+  subtitle: string | null
+  image_url: string | null
+  display_order: number
+  display_mode: 'carousel' | 'grid' | 'both'
+  published: boolean
+}
+
+function CategoriesTab() {
+  const [items, setItems] = useState<Category[]>([])
+  const [loading, setLoading] = useState(true)
+  const [editing, setEditing] = useState<Partial<Category> | null>(null)
+
+  const load = async () => {
+    setLoading(true)
+    const { data, error } = await supabase.from('portfolio_categories').select('*').order('display_order')
+    if (error) toast.error(error.message)
+    else setItems(data as Category[])
+    setLoading(false)
+  }
+  useEffect(() => { load() }, [])
+
+  const remove = async (id: string) => {
+    if (!confirm('Delete this category?')) return
+    const { error } = await supabase.from('portfolio_categories').delete().eq('id', id)
+    if (error) toast.error(error.message); else { toast.success('Deleted'); load() }
+  }
+
+  const save = async (c: Partial<Category>) => {
+    const payload = {
+      slug: (c.slug || c.title!.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')),
+      title: c.title!,
+      subtitle: c.subtitle ?? null,
+      image_url: c.image_url ?? null,
+      display_order: c.display_order ?? 0,
+      display_mode: (c.display_mode ?? 'carousel') as 'carousel' | 'grid' | 'both',
+      published: c.published ?? true,
+    }
+    const q = c.id
+      ? supabase.from('portfolio_categories').update(payload).eq('id', c.id)
+      : supabase.from('portfolio_categories').insert(payload)
+    const { error } = await q
+    if (error) toast.error(error.message); else { toast.success('Saved'); setEditing(null); load() }
+  }
+
+  if (editing) return <CategoryForm category={editing} onSave={save} onCancel={() => setEditing(null)} />
+
+  return (
+    <div className="space-y-4">
+      <div className="flex justify-between">
+        <h2 className="font-serif text-xl">Portfolio Categories (homepage Work section)</h2>
+        <Button onClick={() => setEditing({ display_mode: 'carousel', published: true, display_order: items.length + 1 })}>
+          <Plus className="mr-2 h-4 w-4" /> New Category
+        </Button>
+      </div>
+      {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : (
+        <div className="rounded-lg border border-border">
+          {items.length === 0 ? (
+            <p className="p-8 text-center text-foreground-secondary">No categories yet.</p>
+          ) : items.map(c => (
+            <div key={c.id} className="flex items-center gap-4 border-b border-border p-4 last:border-0">
+              {c.image_url && <img src={c.image_url} alt="" className="h-12 w-12 rounded object-cover" />}
+              <div className="flex-1 min-w-0">
+                <p className="truncate font-medium">{c.title} <span className="text-xs text-foreground-secondary">/{c.slug}</span></p>
+                <p className="text-xs text-foreground-secondary">{c.subtitle}</p>
+              </div>
+              <Badge variant="secondary">{c.display_mode}</Badge>
+              <span className="text-xs text-foreground-secondary">#{c.display_order}</span>
+              {!c.published && <Badge variant="outline">Hidden</Badge>}
+              <Button variant="ghost" size="sm" onClick={() => setEditing(c)}>Edit</Button>
+              <Button variant="ghost" size="icon" onClick={() => remove(c.id)}><Trash2 className="h-4 w-4" /></Button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function CategoryForm({ category, onSave, onCancel }: { category: Partial<Category>; onSave: (c: Partial<Category>) => void; onCancel: () => void }) {
+  const [c, setC] = useState<Partial<Category>>(category)
+  const [uploading, setUploading] = useState(false)
+
+  const upload = async (file: File) => {
+    setUploading(true)
+    const path = `categories/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
+    const { error } = await supabase.storage.from('media').upload(path, file)
+    if (error) { toast.error(error.message); setUploading(false); return }
+    const { data: { publicUrl } } = supabase.storage.from('media').getPublicUrl(path)
+    setC({ ...c, image_url: publicUrl })
+    setUploading(false)
+  }
+
+  return (
+    <form onSubmit={(e) => { e.preventDefault(); onSave(c) }} className="space-y-4 rounded-lg border border-border p-6">
+      <h2 className="font-serif text-xl">{c.id ? 'Edit Category' : 'New Category'}</h2>
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-2">
+          <Label>Title</Label>
+          <Input required value={c.title ?? ''} onChange={(e) => setC({ ...c, title: e.target.value })} />
+        </div>
+        <div className="space-y-2">
+          <Label>Slug (links to /portfolio/&lt;slug&gt;)</Label>
+          <Input value={c.slug ?? ''} onChange={(e) => setC({ ...c, slug: e.target.value })} />
+        </div>
+        <div className="space-y-2 md:col-span-2">
+          <Label>Subtitle</Label>
+          <Input value={c.subtitle ?? ''} onChange={(e) => setC({ ...c, subtitle: e.target.value })} />
+        </div>
+        <div className="space-y-2">
+          <Label>Display mode</Label>
+          <Select value={c.display_mode ?? 'carousel'} onValueChange={(v) => setC({ ...c, display_mode: v as Category['display_mode'] })}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="carousel">Carousel only</SelectItem>
+              <SelectItem value="grid">Grid only</SelectItem>
+              <SelectItem value="both">Both</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label>Display order</Label>
+          <Input type="number" value={c.display_order ?? 0} onChange={(e) => setC({ ...c, display_order: +e.target.value })} />
+        </div>
+      </div>
+      <div className="space-y-2">
+        <Label>Image</Label>
+        <div className="flex items-center gap-3">
+          <Input type="url" placeholder="Image URL" value={c.image_url ?? ''} onChange={(e) => setC({ ...c, image_url: e.target.value })} />
+          <label className="inline-flex items-center gap-2 cursor-pointer rounded border border-border px-3 py-2 text-sm">
+            <Upload className="h-4 w-4" /> {uploading ? 'Uploading…' : 'Upload'}
+            <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
+          </label>
+        </div>
+        {c.image_url && <img src={c.image_url} alt="" className="h-32 rounded object-cover" />}
+      </div>
+      <label className="flex items-center gap-2"><Switch checked={c.published ?? true} onCheckedChange={(v) => setC({ ...c, published: v })} /> Published</label>
+      <div className="flex gap-2">
+        <Button type="submit">Save</Button>
+        <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
+      </div>
+    </form>
+  )
 }

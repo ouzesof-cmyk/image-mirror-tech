@@ -1,14 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { PortfolioPage } from "@/components/portfolio-page";
+import { createFileRoute } from '@tanstack/react-router'
+import { PortfolioCategoryPage } from '@/components/portfolio-category-page'
 
-export const Route = createFileRoute("/portfolio/web-development")({
-  head: () => ({
-    meta: [
-      { title: "Web Development — OUZESOF" },
-      { name: "description", content: "Web Development portfolio by OUZESOF creative agency." },
-      { property: "og:title", content: "Web Development — OUZESOF" },
-      { property: "og:description", content: "Web Development portfolio by OUZESOF creative agency." },
-    ],
-  }),
-  component: () => <PortfolioPage title="web-development" tag="web-development" titleKey={3} />,
-});
+export const Route = createFileRoute('/portfolio/web-development')({
+  component: () => <PortfolioCategoryPage title="Web Development" subtitle="Visual stories that move people." category="web-development" />,
+})

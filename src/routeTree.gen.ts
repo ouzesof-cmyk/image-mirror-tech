@@ -9,18 +9,30 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as LoginRouteImport } from './routes/login'
+import { Route as PortfolioRouteImport } from './routes/portfolio'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PortfolioIndexRouteImport } from './routes/portfolio.index'
+import { Route as PortfolioVideoProductionRouteImport } from './routes/portfolio_.video-production'
 import { Route as PortfolioWebDevelopmentRouteImport } from './routes/portfolio.web-development'
-import { Route as PortfolioVideoProductionRouteImport } from './routes/portfolio.video-production'
 import { Route as PortfolioPhotographyRouteImport } from './routes/portfolio.photography'
 import { Route as PortfolioGraphicDesignRouteImport } from './routes/portfolio.graphic-design'
 import { Route as PortfolioAdCampaignsRouteImport } from './routes/portfolio.ad-campaigns'
+import { Route as AuthLoginRouteImport } from './routes/auth.login'
+import { Route as AdminVideoProductionRouteImport } from './routes/admin_.video-production'
+import { Route as AdminGraphicDesignRouteImport } from './routes/admin_.graphic-design'
+import { Route as PortfolioGraphicDesignIndexRouteImport } from './routes/portfolio.graphic-design.index'
+import { Route as PortfolioGraphicDesignSelectedWorkRouteImport } from './routes/portfolio.graphic-design.selected-work'
+import { Route as PortfolioGraphicDesignMarqueeRouteImport } from './routes/portfolio.graphic-design.marquee'
+import { Route as PortfolioGraphicDesignHeroRouteImport } from './routes/portfolio.graphic-design.hero'
+import { Route as PortfolioGraphicDesignContactRouteImport } from './routes/portfolio.graphic-design.contact'
+import { Route as PortfolioGraphicDesignBrandsRouteImport } from './routes/portfolio.graphic-design.brands'
+import { Route as PortfolioGraphicDesignArchiveRouteImport } from './routes/portfolio.graphic-design.archive'
+import { Route as PortfolioGraphicDesignAboutRouteImport } from './routes/portfolio.graphic-design.about'
 
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
+const PortfolioRoute = PortfolioRouteImport.update({
+  id: '/portfolio',
+  path: '/portfolio',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -33,115 +45,250 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PortfolioWebDevelopmentRoute = PortfolioWebDevelopmentRouteImport.update({
-  id: '/portfolio/web-development',
-  path: '/portfolio/web-development',
-  getParentRoute: () => rootRouteImport,
+const PortfolioIndexRoute = PortfolioIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PortfolioRoute,
 } as any)
 const PortfolioVideoProductionRoute =
   PortfolioVideoProductionRouteImport.update({
-    id: '/portfolio/video-production',
+    id: '/portfolio_/video-production',
     path: '/portfolio/video-production',
     getParentRoute: () => rootRouteImport,
   } as any)
+const PortfolioWebDevelopmentRoute = PortfolioWebDevelopmentRouteImport.update({
+  id: '/web-development',
+  path: '/web-development',
+  getParentRoute: () => PortfolioRoute,
+} as any)
 const PortfolioPhotographyRoute = PortfolioPhotographyRouteImport.update({
-  id: '/portfolio/photography',
-  path: '/portfolio/photography',
-  getParentRoute: () => rootRouteImport,
+  id: '/photography',
+  path: '/photography',
+  getParentRoute: () => PortfolioRoute,
 } as any)
 const PortfolioGraphicDesignRoute = PortfolioGraphicDesignRouteImport.update({
-  id: '/portfolio/graphic-design',
-  path: '/portfolio/graphic-design',
-  getParentRoute: () => rootRouteImport,
+  id: '/graphic-design',
+  path: '/graphic-design',
+  getParentRoute: () => PortfolioRoute,
 } as any)
 const PortfolioAdCampaignsRoute = PortfolioAdCampaignsRouteImport.update({
-  id: '/portfolio/ad-campaigns',
-  path: '/portfolio/ad-campaigns',
+  id: '/ad-campaigns',
+  path: '/ad-campaigns',
+  getParentRoute: () => PortfolioRoute,
+} as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/auth/login',
+  path: '/auth/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminVideoProductionRoute = AdminVideoProductionRouteImport.update({
+  id: '/admin_/video-production',
+  path: '/admin/video-production',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminGraphicDesignRoute = AdminGraphicDesignRouteImport.update({
+  id: '/admin_/graphic-design',
+  path: '/admin/graphic-design',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PortfolioGraphicDesignIndexRoute =
+  PortfolioGraphicDesignIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => PortfolioGraphicDesignRoute,
+  } as any)
+const PortfolioGraphicDesignSelectedWorkRoute =
+  PortfolioGraphicDesignSelectedWorkRouteImport.update({
+    id: '/selected-work',
+    path: '/selected-work',
+    getParentRoute: () => PortfolioGraphicDesignRoute,
+  } as any)
+const PortfolioGraphicDesignMarqueeRoute =
+  PortfolioGraphicDesignMarqueeRouteImport.update({
+    id: '/marquee',
+    path: '/marquee',
+    getParentRoute: () => PortfolioGraphicDesignRoute,
+  } as any)
+const PortfolioGraphicDesignHeroRoute =
+  PortfolioGraphicDesignHeroRouteImport.update({
+    id: '/hero',
+    path: '/hero',
+    getParentRoute: () => PortfolioGraphicDesignRoute,
+  } as any)
+const PortfolioGraphicDesignContactRoute =
+  PortfolioGraphicDesignContactRouteImport.update({
+    id: '/contact',
+    path: '/contact',
+    getParentRoute: () => PortfolioGraphicDesignRoute,
+  } as any)
+const PortfolioGraphicDesignBrandsRoute =
+  PortfolioGraphicDesignBrandsRouteImport.update({
+    id: '/brands',
+    path: '/brands',
+    getParentRoute: () => PortfolioGraphicDesignRoute,
+  } as any)
+const PortfolioGraphicDesignArchiveRoute =
+  PortfolioGraphicDesignArchiveRouteImport.update({
+    id: '/archive',
+    path: '/archive',
+    getParentRoute: () => PortfolioGraphicDesignRoute,
+  } as any)
+const PortfolioGraphicDesignAboutRoute =
+  PortfolioGraphicDesignAboutRouteImport.update({
+    id: '/about',
+    path: '/about',
+    getParentRoute: () => PortfolioGraphicDesignRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/login': typeof LoginRoute
+  '/portfolio': typeof PortfolioRouteWithChildren
+  '/admin/graphic-design': typeof AdminGraphicDesignRoute
+  '/admin/video-production': typeof AdminVideoProductionRoute
+  '/auth/login': typeof AuthLoginRoute
   '/portfolio/ad-campaigns': typeof PortfolioAdCampaignsRoute
-  '/portfolio/graphic-design': typeof PortfolioGraphicDesignRoute
+  '/portfolio/graphic-design': typeof PortfolioGraphicDesignRouteWithChildren
   '/portfolio/photography': typeof PortfolioPhotographyRoute
-  '/portfolio/video-production': typeof PortfolioVideoProductionRoute
   '/portfolio/web-development': typeof PortfolioWebDevelopmentRoute
+  '/portfolio/video-production': typeof PortfolioVideoProductionRoute
+  '/portfolio/': typeof PortfolioIndexRoute
+  '/portfolio/graphic-design/about': typeof PortfolioGraphicDesignAboutRoute
+  '/portfolio/graphic-design/archive': typeof PortfolioGraphicDesignArchiveRoute
+  '/portfolio/graphic-design/brands': typeof PortfolioGraphicDesignBrandsRoute
+  '/portfolio/graphic-design/contact': typeof PortfolioGraphicDesignContactRoute
+  '/portfolio/graphic-design/hero': typeof PortfolioGraphicDesignHeroRoute
+  '/portfolio/graphic-design/marquee': typeof PortfolioGraphicDesignMarqueeRoute
+  '/portfolio/graphic-design/selected-work': typeof PortfolioGraphicDesignSelectedWorkRoute
+  '/portfolio/graphic-design/': typeof PortfolioGraphicDesignIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/login': typeof LoginRoute
+  '/admin/graphic-design': typeof AdminGraphicDesignRoute
+  '/admin/video-production': typeof AdminVideoProductionRoute
+  '/auth/login': typeof AuthLoginRoute
   '/portfolio/ad-campaigns': typeof PortfolioAdCampaignsRoute
-  '/portfolio/graphic-design': typeof PortfolioGraphicDesignRoute
   '/portfolio/photography': typeof PortfolioPhotographyRoute
-  '/portfolio/video-production': typeof PortfolioVideoProductionRoute
   '/portfolio/web-development': typeof PortfolioWebDevelopmentRoute
+  '/portfolio/video-production': typeof PortfolioVideoProductionRoute
+  '/portfolio': typeof PortfolioIndexRoute
+  '/portfolio/graphic-design/about': typeof PortfolioGraphicDesignAboutRoute
+  '/portfolio/graphic-design/archive': typeof PortfolioGraphicDesignArchiveRoute
+  '/portfolio/graphic-design/brands': typeof PortfolioGraphicDesignBrandsRoute
+  '/portfolio/graphic-design/contact': typeof PortfolioGraphicDesignContactRoute
+  '/portfolio/graphic-design/hero': typeof PortfolioGraphicDesignHeroRoute
+  '/portfolio/graphic-design/marquee': typeof PortfolioGraphicDesignMarqueeRoute
+  '/portfolio/graphic-design/selected-work': typeof PortfolioGraphicDesignSelectedWorkRoute
+  '/portfolio/graphic-design': typeof PortfolioGraphicDesignIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/login': typeof LoginRoute
+  '/portfolio': typeof PortfolioRouteWithChildren
+  '/admin_/graphic-design': typeof AdminGraphicDesignRoute
+  '/admin_/video-production': typeof AdminVideoProductionRoute
+  '/auth/login': typeof AuthLoginRoute
   '/portfolio/ad-campaigns': typeof PortfolioAdCampaignsRoute
-  '/portfolio/graphic-design': typeof PortfolioGraphicDesignRoute
+  '/portfolio/graphic-design': typeof PortfolioGraphicDesignRouteWithChildren
   '/portfolio/photography': typeof PortfolioPhotographyRoute
-  '/portfolio/video-production': typeof PortfolioVideoProductionRoute
   '/portfolio/web-development': typeof PortfolioWebDevelopmentRoute
+  '/portfolio_/video-production': typeof PortfolioVideoProductionRoute
+  '/portfolio/': typeof PortfolioIndexRoute
+  '/portfolio/graphic-design/about': typeof PortfolioGraphicDesignAboutRoute
+  '/portfolio/graphic-design/archive': typeof PortfolioGraphicDesignArchiveRoute
+  '/portfolio/graphic-design/brands': typeof PortfolioGraphicDesignBrandsRoute
+  '/portfolio/graphic-design/contact': typeof PortfolioGraphicDesignContactRoute
+  '/portfolio/graphic-design/hero': typeof PortfolioGraphicDesignHeroRoute
+  '/portfolio/graphic-design/marquee': typeof PortfolioGraphicDesignMarqueeRoute
+  '/portfolio/graphic-design/selected-work': typeof PortfolioGraphicDesignSelectedWorkRoute
+  '/portfolio/graphic-design/': typeof PortfolioGraphicDesignIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/admin'
-    | '/login'
+    | '/portfolio'
+    | '/admin/graphic-design'
+    | '/admin/video-production'
+    | '/auth/login'
     | '/portfolio/ad-campaigns'
     | '/portfolio/graphic-design'
     | '/portfolio/photography'
-    | '/portfolio/video-production'
     | '/portfolio/web-development'
+    | '/portfolio/video-production'
+    | '/portfolio/'
+    | '/portfolio/graphic-design/about'
+    | '/portfolio/graphic-design/archive'
+    | '/portfolio/graphic-design/brands'
+    | '/portfolio/graphic-design/contact'
+    | '/portfolio/graphic-design/hero'
+    | '/portfolio/graphic-design/marquee'
+    | '/portfolio/graphic-design/selected-work'
+    | '/portfolio/graphic-design/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin'
-    | '/login'
+    | '/admin/graphic-design'
+    | '/admin/video-production'
+    | '/auth/login'
     | '/portfolio/ad-campaigns'
-    | '/portfolio/graphic-design'
     | '/portfolio/photography'
-    | '/portfolio/video-production'
     | '/portfolio/web-development'
+    | '/portfolio/video-production'
+    | '/portfolio'
+    | '/portfolio/graphic-design/about'
+    | '/portfolio/graphic-design/archive'
+    | '/portfolio/graphic-design/brands'
+    | '/portfolio/graphic-design/contact'
+    | '/portfolio/graphic-design/hero'
+    | '/portfolio/graphic-design/marquee'
+    | '/portfolio/graphic-design/selected-work'
+    | '/portfolio/graphic-design'
   id:
     | '__root__'
     | '/'
     | '/admin'
-    | '/login'
+    | '/portfolio'
+    | '/admin_/graphic-design'
+    | '/admin_/video-production'
+    | '/auth/login'
     | '/portfolio/ad-campaigns'
     | '/portfolio/graphic-design'
     | '/portfolio/photography'
-    | '/portfolio/video-production'
     | '/portfolio/web-development'
+    | '/portfolio_/video-production'
+    | '/portfolio/'
+    | '/portfolio/graphic-design/about'
+    | '/portfolio/graphic-design/archive'
+    | '/portfolio/graphic-design/brands'
+    | '/portfolio/graphic-design/contact'
+    | '/portfolio/graphic-design/hero'
+    | '/portfolio/graphic-design/marquee'
+    | '/portfolio/graphic-design/selected-work'
+    | '/portfolio/graphic-design/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
-  LoginRoute: typeof LoginRoute
-  PortfolioAdCampaignsRoute: typeof PortfolioAdCampaignsRoute
-  PortfolioGraphicDesignRoute: typeof PortfolioGraphicDesignRoute
-  PortfolioPhotographyRoute: typeof PortfolioPhotographyRoute
+  PortfolioRoute: typeof PortfolioRouteWithChildren
+  AdminGraphicDesignRoute: typeof AdminGraphicDesignRoute
+  AdminVideoProductionRoute: typeof AdminVideoProductionRoute
+  AuthLoginRoute: typeof AuthLoginRoute
   PortfolioVideoProductionRoute: typeof PortfolioVideoProductionRoute
-  PortfolioWebDevelopmentRoute: typeof PortfolioWebDevelopmentRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
+    '/portfolio': {
+      id: '/portfolio'
+      path: '/portfolio'
+      fullPath: '/portfolio'
+      preLoaderRoute: typeof PortfolioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -158,54 +305,195 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/portfolio/web-development': {
-      id: '/portfolio/web-development'
-      path: '/portfolio/web-development'
-      fullPath: '/portfolio/web-development'
-      preLoaderRoute: typeof PortfolioWebDevelopmentRouteImport
-      parentRoute: typeof rootRouteImport
+    '/portfolio/': {
+      id: '/portfolio/'
+      path: '/'
+      fullPath: '/portfolio/'
+      preLoaderRoute: typeof PortfolioIndexRouteImport
+      parentRoute: typeof PortfolioRoute
     }
-    '/portfolio/video-production': {
-      id: '/portfolio/video-production'
+    '/portfolio_/video-production': {
+      id: '/portfolio_/video-production'
       path: '/portfolio/video-production'
       fullPath: '/portfolio/video-production'
       preLoaderRoute: typeof PortfolioVideoProductionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/portfolio/web-development': {
+      id: '/portfolio/web-development'
+      path: '/web-development'
+      fullPath: '/portfolio/web-development'
+      preLoaderRoute: typeof PortfolioWebDevelopmentRouteImport
+      parentRoute: typeof PortfolioRoute
+    }
     '/portfolio/photography': {
       id: '/portfolio/photography'
-      path: '/portfolio/photography'
+      path: '/photography'
       fullPath: '/portfolio/photography'
       preLoaderRoute: typeof PortfolioPhotographyRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof PortfolioRoute
     }
     '/portfolio/graphic-design': {
       id: '/portfolio/graphic-design'
-      path: '/portfolio/graphic-design'
+      path: '/graphic-design'
       fullPath: '/portfolio/graphic-design'
       preLoaderRoute: typeof PortfolioGraphicDesignRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof PortfolioRoute
     }
     '/portfolio/ad-campaigns': {
       id: '/portfolio/ad-campaigns'
-      path: '/portfolio/ad-campaigns'
+      path: '/ad-campaigns'
       fullPath: '/portfolio/ad-campaigns'
       preLoaderRoute: typeof PortfolioAdCampaignsRouteImport
+      parentRoute: typeof PortfolioRoute
+    }
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/auth/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin_/video-production': {
+      id: '/admin_/video-production'
+      path: '/admin/video-production'
+      fullPath: '/admin/video-production'
+      preLoaderRoute: typeof AdminVideoProductionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin_/graphic-design': {
+      id: '/admin_/graphic-design'
+      path: '/admin/graphic-design'
+      fullPath: '/admin/graphic-design'
+      preLoaderRoute: typeof AdminGraphicDesignRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portfolio/graphic-design/': {
+      id: '/portfolio/graphic-design/'
+      path: '/'
+      fullPath: '/portfolio/graphic-design/'
+      preLoaderRoute: typeof PortfolioGraphicDesignIndexRouteImport
+      parentRoute: typeof PortfolioGraphicDesignRoute
+    }
+    '/portfolio/graphic-design/selected-work': {
+      id: '/portfolio/graphic-design/selected-work'
+      path: '/selected-work'
+      fullPath: '/portfolio/graphic-design/selected-work'
+      preLoaderRoute: typeof PortfolioGraphicDesignSelectedWorkRouteImport
+      parentRoute: typeof PortfolioGraphicDesignRoute
+    }
+    '/portfolio/graphic-design/marquee': {
+      id: '/portfolio/graphic-design/marquee'
+      path: '/marquee'
+      fullPath: '/portfolio/graphic-design/marquee'
+      preLoaderRoute: typeof PortfolioGraphicDesignMarqueeRouteImport
+      parentRoute: typeof PortfolioGraphicDesignRoute
+    }
+    '/portfolio/graphic-design/hero': {
+      id: '/portfolio/graphic-design/hero'
+      path: '/hero'
+      fullPath: '/portfolio/graphic-design/hero'
+      preLoaderRoute: typeof PortfolioGraphicDesignHeroRouteImport
+      parentRoute: typeof PortfolioGraphicDesignRoute
+    }
+    '/portfolio/graphic-design/contact': {
+      id: '/portfolio/graphic-design/contact'
+      path: '/contact'
+      fullPath: '/portfolio/graphic-design/contact'
+      preLoaderRoute: typeof PortfolioGraphicDesignContactRouteImport
+      parentRoute: typeof PortfolioGraphicDesignRoute
+    }
+    '/portfolio/graphic-design/brands': {
+      id: '/portfolio/graphic-design/brands'
+      path: '/brands'
+      fullPath: '/portfolio/graphic-design/brands'
+      preLoaderRoute: typeof PortfolioGraphicDesignBrandsRouteImport
+      parentRoute: typeof PortfolioGraphicDesignRoute
+    }
+    '/portfolio/graphic-design/archive': {
+      id: '/portfolio/graphic-design/archive'
+      path: '/archive'
+      fullPath: '/portfolio/graphic-design/archive'
+      preLoaderRoute: typeof PortfolioGraphicDesignArchiveRouteImport
+      parentRoute: typeof PortfolioGraphicDesignRoute
+    }
+    '/portfolio/graphic-design/about': {
+      id: '/portfolio/graphic-design/about'
+      path: '/about'
+      fullPath: '/portfolio/graphic-design/about'
+      preLoaderRoute: typeof PortfolioGraphicDesignAboutRouteImport
+      parentRoute: typeof PortfolioGraphicDesignRoute
     }
   }
 }
 
+interface PortfolioGraphicDesignRouteChildren {
+  PortfolioGraphicDesignAboutRoute: typeof PortfolioGraphicDesignAboutRoute
+  PortfolioGraphicDesignArchiveRoute: typeof PortfolioGraphicDesignArchiveRoute
+  PortfolioGraphicDesignBrandsRoute: typeof PortfolioGraphicDesignBrandsRoute
+  PortfolioGraphicDesignContactRoute: typeof PortfolioGraphicDesignContactRoute
+  PortfolioGraphicDesignHeroRoute: typeof PortfolioGraphicDesignHeroRoute
+  PortfolioGraphicDesignMarqueeRoute: typeof PortfolioGraphicDesignMarqueeRoute
+  PortfolioGraphicDesignSelectedWorkRoute: typeof PortfolioGraphicDesignSelectedWorkRoute
+  PortfolioGraphicDesignIndexRoute: typeof PortfolioGraphicDesignIndexRoute
+}
+
+const PortfolioGraphicDesignRouteChildren: PortfolioGraphicDesignRouteChildren =
+  {
+    PortfolioGraphicDesignAboutRoute: PortfolioGraphicDesignAboutRoute,
+    PortfolioGraphicDesignArchiveRoute: PortfolioGraphicDesignArchiveRoute,
+    PortfolioGraphicDesignBrandsRoute: PortfolioGraphicDesignBrandsRoute,
+    PortfolioGraphicDesignContactRoute: PortfolioGraphicDesignContactRoute,
+    PortfolioGraphicDesignHeroRoute: PortfolioGraphicDesignHeroRoute,
+    PortfolioGraphicDesignMarqueeRoute: PortfolioGraphicDesignMarqueeRoute,
+    PortfolioGraphicDesignSelectedWorkRoute:
+      PortfolioGraphicDesignSelectedWorkRoute,
+    PortfolioGraphicDesignIndexRoute: PortfolioGraphicDesignIndexRoute,
+  }
+
+const PortfolioGraphicDesignRouteWithChildren =
+  PortfolioGraphicDesignRoute._addFileChildren(
+    PortfolioGraphicDesignRouteChildren,
+  )
+
+interface PortfolioRouteChildren {
+  PortfolioAdCampaignsRoute: typeof PortfolioAdCampaignsRoute
+  PortfolioGraphicDesignRoute: typeof PortfolioGraphicDesignRouteWithChildren
+  PortfolioPhotographyRoute: typeof PortfolioPhotographyRoute
+  PortfolioWebDevelopmentRoute: typeof PortfolioWebDevelopmentRoute
+  PortfolioIndexRoute: typeof PortfolioIndexRoute
+}
+
+const PortfolioRouteChildren: PortfolioRouteChildren = {
+  PortfolioAdCampaignsRoute: PortfolioAdCampaignsRoute,
+  PortfolioGraphicDesignRoute: PortfolioGraphicDesignRouteWithChildren,
+  PortfolioPhotographyRoute: PortfolioPhotographyRoute,
+  PortfolioWebDevelopmentRoute: PortfolioWebDevelopmentRoute,
+  PortfolioIndexRoute: PortfolioIndexRoute,
+}
+
+const PortfolioRouteWithChildren = PortfolioRoute._addFileChildren(
+  PortfolioRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
-  LoginRoute: LoginRoute,
-  PortfolioAdCampaignsRoute: PortfolioAdCampaignsRoute,
-  PortfolioGraphicDesignRoute: PortfolioGraphicDesignRoute,
-  PortfolioPhotographyRoute: PortfolioPhotographyRoute,
+  PortfolioRoute: PortfolioRouteWithChildren,
+  AdminGraphicDesignRoute: AdminGraphicDesignRoute,
+  AdminVideoProductionRoute: AdminVideoProductionRoute,
+  AuthLoginRoute: AuthLoginRoute,
   PortfolioVideoProductionRoute: PortfolioVideoProductionRoute,
-  PortfolioWebDevelopmentRoute: PortfolioWebDevelopmentRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

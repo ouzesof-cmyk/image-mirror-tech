@@ -1,11 +1,9 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect } from 'react'
-
 export function PageLoader() {
   const [isLoading, setIsLoading] = useState(true)
   const [progress, setProgress] = useState(0)
   const [isMounted, setIsMounted] = useState(false)
-
   useEffect(() => {
     setIsMounted(true)
     
@@ -19,13 +17,11 @@ export function PageLoader() {
         return prev + Math.random() * 15
       })
     }, 100)
-
     return () => clearInterval(timer)
   }, [])
   
   // Don't render on server to prevent hydration mismatch
   if (!isMounted) return null
-
   return (
     <AnimatePresence>
       {isLoading && (

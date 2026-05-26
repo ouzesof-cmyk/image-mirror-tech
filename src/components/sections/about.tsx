@@ -1,8 +1,8 @@
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { useRef } from 'react'
+import { Link } from '@/components/link'
 import { SectionLabel } from '@/components/section-label'
 import { useLanguage } from '@/lib/language-context'
-
 export function AboutSection() {
   const { t, isRTL } = useLanguage()
   const containerRef = useRef(null)
@@ -13,9 +13,7 @@ export function AboutSection() {
   
   const letterY1 = useTransform(scrollYProgress, [0, 1], [100, -100])
   const letterY2 = useTransform(scrollYProgress, [0, 1], [-50, 50])
-
   const practiceLetters = 'Practice'.split('')
-
   return (
     <section id="about" ref={containerRef} className="relative bg-background-secondary px-4 sm:px-6 py-16 sm:py-32" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="mx-auto max-w-7xl">
@@ -53,12 +51,13 @@ export function AboutSection() {
               transition={{ delay: 0.2 }}
               className="mt-10"
             >
-              <a href="#work"
+              <Link
+                href="#work"
                 className={`group inline-flex items-center gap-2 text-sm tracking-[0.15em] text-foreground transition-colors hover:text-accent-gold ${isRTL ? 'flex-row-reverse' : ''}`}
               >
                 {t.about.seeWorks}
                 <span className={`transition-transform ${isRTL ? 'group-hover:-translate-x-1 rotate-180' : 'group-hover:translate-x-1'}`}>→</span>
-              </a>
+              </Link>
             </motion.div>
           </div>
           

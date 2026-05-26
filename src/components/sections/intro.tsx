@@ -1,15 +1,14 @@
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { useRef } from 'react'
 import { SectionLabel } from '@/components/section-label'
+import { Link } from '@/components/link'
 export function IntroSection() {
   const containerRef = useRef(null)
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start end', 'end start'],
   })
-
   const y = useTransform(scrollYProgress, [0, 1], [100, -100])
-
   return (
     <section ref={containerRef} className="relative bg-background px-4 sm:px-6 py-16 sm:py-32">
       <div className="mx-auto max-w-7xl">
@@ -18,7 +17,6 @@ export function IntroSection() {
           code="(OZS — 02)"
           title="Creative Development"
         />
-
         <div className="grid gap-8 sm:gap-12 lg:grid-cols-2 lg:gap-20">
           <div>
             <motion.h2
@@ -30,7 +28,6 @@ export function IntroSection() {
             >
               <span className="text-accent-gold">11+</span> years of digital form, sharp interactions, and relentless creative discipline and effort.
             </motion.h2>
-
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -38,7 +35,8 @@ export function IntroSection() {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="mt-6 sm:mt-10"
             >
-              <a href="#contact"
+              <Link
+                href="#contact"
                 className="group inline-flex items-center gap-2 sm:gap-3 border border-foreground px-6 sm:px-8 py-3 sm:py-4 text-xs sm:text-sm tracking-[0.15em] text-foreground transition-all hover:bg-foreground hover:text-background"
               >
                 Contact
@@ -47,10 +45,9 @@ export function IntroSection() {
                 >
                   →
                 </motion.span>
-              </a>
+              </Link>
             </motion.div>
           </div>
-
           <motion.div
             style={{ y }}
             className="flex items-end"

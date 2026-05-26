@@ -2,7 +2,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useState } from 'react'
 import { SectionLabel } from '@/components/section-label'
 import { LargeTextReveal } from '@/components/large-text-reveal'
-
 const faqs = [
   {
     number: '01',
@@ -35,10 +34,8 @@ const faqs = [
     answer: 'Our process follows four phases: Discovery (understanding your goals), Strategy (defining the approach), Creation (design and development), and Launch (deployment and optimization). We maintain transparent communication throughout.',
   },
 ]
-
 export function FAQSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
-
   return (
     <section className="bg-background px-4 sm:px-6 py-16 sm:py-32">
       <div className="mx-auto max-w-7xl">

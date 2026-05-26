@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
+import { Image } from '@/components/image'
 import { SectionLabel } from '@/components/section-label'
-
 const team = [
   {
     name: 'Alexandra Chen',
@@ -27,7 +27,6 @@ const team = [
     bio: 'Bringing ideas to life through film and motion.',
   },
 ]
-
 export function TeamSection() {
   return (
     <section id="team" className="bg-background-secondary px-4 sm:px-6 py-16 sm:py-32">
@@ -48,7 +47,6 @@ export function TeamSection() {
             The minds behind the magic
           </motion.h2>
         </div>
-
         <div className="grid grid-cols-2 gap-4 sm:gap-8 lg:grid-cols-4">
           {team.map((member, index) => (
             <motion.div
@@ -60,10 +58,10 @@ export function TeamSection() {
               className="group"
             >
               <div className="relative mb-3 sm:mb-6 aspect-[3/4] overflow-hidden bg-muted">
-                <img
+                <Image
                   src={member.image}
                   alt={member.name}
-                  style={{position:"absolute",inset:0,width:"100%",height:"100%"}}
+                  fill
                   className="object-cover grayscale transition-all duration-700 group-hover:scale-105 group-hover:grayscale-0"
                   sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
                 />
@@ -76,7 +74,6 @@ export function TeamSection() {
                   <p className="text-xs sm:text-sm text-primary-foreground">{member.bio}</p>
                 </div>
               </div>
-
               <div className="flex items-start justify-between gap-1">
                 <div className="min-w-0 flex-1">
                   <h3 className="font-serif text-sm sm:text-xl text-foreground truncate">{member.name}</h3>

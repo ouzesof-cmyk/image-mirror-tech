@@ -1,12 +1,10 @@
 import { motion } from 'framer-motion'
 import { useLanguage } from '@/lib/language-context'
-
 interface SectionLabelProps {
   japanese: string
   code: string
   title: string
 }
-
 export function SectionLabel({ japanese, code, title }: SectionLabelProps) {
   const { isRTL } = useLanguage()
   

@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { Image } from '@/components/image'
 import { useLanguage } from '@/lib/language-context'
-
 export function HeroSection() {
   const { t, isRTL } = useLanguage()
   const slides = t.hero.slides
@@ -12,7 +12,6 @@ export function HeroSection() {
   const sectionRef = useRef<HTMLElement>(null)
   const touchStartY = useRef<number>(0)
   const touchStartX = useRef<number>(0)
-
   const goToSlide = useCallback((index: number) => {
     if (isAnimating || index === currentSlide) return
     if (index < 0 || index >= slides.length) return
@@ -20,16 +19,13 @@ export function HeroSection() {
     setCurrentSlide(index)
     setTimeout(() => setIsAnimating(false), 800)
   }, [isAnimating, currentSlide, slides.length])
-
   const nextSlide = useCallback(() => {
     goToSlide((currentSlide + 1) % slides.length)
   }, [currentSlide, goToSlide, slides.length])
-
   const prevSlide = useCallback(() => {
     if (currentSlide === 0) return // Stay on first slide, don't loop
     goToSlide(currentSlide - 1)
   }, [currentSlide, goToSlide])
-
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -42,11 +38,9 @@ export function HeroSection() {
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [nextSlide, prevSlide])
-
   // Detect when user scrolls back to the hero section
   useEffect(() => {
     if (!hasCompletedCarousel) return
-
     const handleScroll = () => {
       if (window.scrollY === 0) {
         // User scrolled back to top, re-enable carousel starting from last slide
@@ -54,11 +48,9 @@ export function HeroSection() {
         setCurrentSlide(slides.length - 1)
       }
     }
-
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [hasCompletedCarousel, slides.length])
-
   // Lock body scroll until carousel is completed
   useEffect(() => {
     if (!hasCompletedCarousel) {
@@ -70,22 +62,17 @@ export function HeroSection() {
       document.body.style.overflow = ''
     }
   }, [hasCompletedCarousel])
-
   // Mouse wheel navigation - completely prevents page scroll
   useEffect(() => {
     if (hasCompletedCarousel) return
-
     let wheelTimeout: NodeJS.Timeout
     let lastWheelTime = 0
-
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault()
       e.stopPropagation()
-
       const now = Date.now()
       if (now - lastWheelTime < 100) return // Debounce
       lastWheelTime = now
-
       clearTimeout(wheelTimeout)
       wheelTimeout = setTimeout(() => {
         if (e.deltaY > 20) {
@@ -99,17 +86,14 @@ export function HeroSection() {
         }
       }, 50)
     }
-
     // Touch handling for mobile swipe
     const handleTouchStart = (e: TouchEvent) => {
       touchStartY.current = e.touches[0].clientY
       touchStartX.current = e.touches[0].clientX
     }
-
     const handleTouchMove = (e: TouchEvent) => {
       e.preventDefault()
     }
-
     const handleTouchEnd = (e: TouchEvent) => {
       const touchEndY = e.changedTouches[0].clientY
       const touchEndX = e.changedTouches[0].clientX
@@ -131,12 +115,10 @@ export function HeroSection() {
         }
       }
     }
-
     window.addEventListener('wheel', handleWheel, { passive: false, capture: true })
     window.addEventListener('touchstart', handleTouchStart, { passive: true })
     window.addEventListener('touchmove', handleTouchMove, { passive: false })
     window.addEventListener('touchend', handleTouchEnd, { passive: true })
-
     return () => {
       window.removeEventListener('wheel', handleWheel, { capture: true })
       window.removeEventListener('touchstart', handleTouchStart)
@@ -145,9 +127,7 @@ export function HeroSection() {
       clearTimeout(wheelTimeout)
     }
   }, [nextSlide, prevSlide, hasCompletedCarousel, currentSlide, slides.length])
-
   const slide = slides[currentSlide]
-
   return (
     <section
       ref={sectionRef}
@@ -178,7 +158,6 @@ export function HeroSection() {
               >
                 {slide.label}
               </motion.p>
-
               {/* Main Headline */}
               <div className="space-y-1 sm:space-y-2">
                 {slide.headline.map((line, i) => (
@@ -190,13 +169,13 @@ export function HeroSection() {
                     className="font-serif text-3xl leading-tight text-foreground sm:text-5xl md:text-7xl lg:text-8xl"
                   >
                     {line === 'logo' ? (
-                      <img
+                      <Image
                         src="/images/logo-full.png"
                         alt="OUZESOF"
                         width={1000}
                         height={200}
                         className="mx-auto h-10 w-auto sm:h-16 md:h-48 lg:h-54"
-                       
+                        priority
                       />
                     ) : (
                       line
@@ -204,7 +183,6 @@ export function HeroSection() {
                   </motion.div>
                 ))}
               </div>
-
               {/* Accent Text */}
               <motion.p
                 initial={{ opacity: 0 }}
@@ -214,7 +192,6 @@ export function HeroSection() {
               >
                 {slide.accent}
               </motion.p>
-
               {/* Description */}
               <motion.p
                 initial={{ opacity: 0 }}
@@ -228,7 +205,6 @@ export function HeroSection() {
           </AnimatePresence>
         </div>
       </div>
-
       {/* Slide Indicators - Right Side (or Left for RTL) - Hidden on small mobile */}
       <div className={`absolute ${isRTL ? 'left-3 sm:left-6 md:left-10' : 'right-3 sm:right-6 md:right-10'} top-1/2 z-20 hidden sm:flex -translate-y-1/2 flex-col items-center gap-2 sm:gap-3`}>
         {slides.map((s, i) => (
@@ -255,14 +231,12 @@ export function HeroSection() {
           </button>
         ))}
       </div>
-
       {/* Slide Counter */}
       <div className={`absolute bottom-6 sm:bottom-10 ${isRTL ? 'left-4 sm:left-6 md:left-10' : 'right-4 sm:right-6 md:right-10'} z-20`}>
         <span className="font-mono text-[10px] sm:text-xs tracking-wider text-foreground-secondary">
           {String(currentSlide + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}
         </span>
       </div>
-
       {/* Decorative Elements */}
       <motion.div
         initial={{ scale: 0 }}

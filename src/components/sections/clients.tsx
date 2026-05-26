@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion'
 import { SectionLabel } from '@/components/section-label'
 import { Marquee } from '@/components/marquee'
-
 const clients = [
   'Meridian',
   'Aurora',
@@ -16,7 +15,6 @@ const clients = [
   'Pulse',
   'Nova',
 ]
-
 export function ClientsSection() {
   return (
     <section className="bg-background py-16 sm:py-32">

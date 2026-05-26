@@ -1,14 +1,11 @@
-import { motion } from 'framer-motion'
-
+import { motion, type Variants } from 'framer-motion'
 interface TextRevealProps {
   text: string
   className?: string
   delay?: number
 }
-
 export function TextReveal({ text, className = '', delay = 0 }: TextRevealProps) {
   const words = text.split(' ')
-
   const container = {
     hidden: { opacity: 0 },
     visible: (i = 1) => ({
@@ -16,8 +13,7 @@ export function TextReveal({ text, className = '', delay = 0 }: TextRevealProps)
       transition: { staggerChildren: 0.08, delayChildren: delay },
     }),
   }
-
-  const child = {
+  const child: Variants = {
     visible: {
       opacity: 1,
       y: 0,
@@ -32,7 +28,6 @@ export function TextReveal({ text, className = '', delay = 0 }: TextRevealProps)
       y: 20,
     },
   }
-
   return (
     <motion.span
       className={`inline-flex flex-wrap ${className}`}

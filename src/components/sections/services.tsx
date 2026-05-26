@@ -2,12 +2,10 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useState } from 'react'
 import { SectionLabel } from '@/components/section-label'
 import { useLanguage } from '@/lib/language-context'
-
 export function ServicesSection() {
   const { t, isRTL } = useLanguage()
   const services = t.services.items
   const [openIndex, setOpenIndex] = useState<number | null>(0)
-
   return (
     <section id="services" className="bg-background px-4 sm:px-6 py-16 sm:py-32" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="mx-auto max-w-7xl">

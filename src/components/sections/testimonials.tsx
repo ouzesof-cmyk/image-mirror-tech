@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect, useCallback } from 'react'
 import { SectionLabel } from '@/components/section-label'
+import { Link } from '@/components/link'
 const testimonials = [
   {
     quote: "OUZESOF elevated every layer of our brand's online presence. From motion details to structural layout, every piece felt crafted and intentional. The site not only looked beautiful but performed well too — and the entire collaboration process was smooth.",
@@ -28,25 +29,20 @@ const testimonials = [
     role: 'CEO, Willow Studio',
   },
 ]
-
 export function TestimonialsSection() {
   const [current, setCurrent] = useState(0)
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
-
   const next = useCallback(() => {
     setCurrent((prev) => (prev + 1) % testimonials.length)
   }, [])
-
   const prev = useCallback(() => {
     setCurrent((prev) => (prev - 1 + testimonials.length) % testimonials.length)
   }, [])
-
   useEffect(() => {
     if (!isAutoPlaying) return
     const interval = setInterval(next, 6000)
     return () => clearInterval(interval)
   }, [isAutoPlaying, next])
-
   return (
     <section className="bg-background px-4 sm:px-6 py-16 sm:py-32">
       <div className="mx-auto max-w-7xl">
@@ -57,12 +53,13 @@ export function TestimonialsSection() {
         />
         
         <div className="flex flex-col sm:flex-row items-start justify-between gap-4 sm:gap-8 mb-8 sm:mb-16">
-          <a href="#contact"
+          <Link
+            href="#contact"
             className="group inline-flex items-center gap-2 border border-foreground px-4 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm tracking-[0.15em] text-foreground transition-all hover:bg-foreground hover:text-background"
           >
             Get in touch
             <span className="transition-transform group-hover:translate-x-1">→</span>
-          </a>
+          </Link>
           
           <div className="flex items-center gap-2 sm:gap-4">
             <button

@@ -1,8 +1,7 @@
 import { motion, useMotionValue, useSpring } from 'framer-motion'
 import { useEffect, useState } from 'react'
-
 export function CustomCursor() {
-  const [isHovering, setIsHovering] = useState(false)
+  const [hoverType, setHoverType] = useState<'none' | 'pointer' | 'text'>('none')
   const [isVisible, setIsVisible] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
   
@@ -12,7 +11,6 @@ export function CustomCursor() {
   const springConfig = { damping: 25, stiffness: 300 }
   const cursorXSpring = useSpring(cursorX, springConfig)
   const cursorYSpring = useSpring(cursorY, springConfig)
-
   useEffect(() => {
     setIsMounted(true)
     
@@ -24,39 +22,42 @@ export function CustomCursor() {
       cursorY.set(e.clientY)
       setIsVisible(true)
     }
-
     const handleMouseEnter = () => setIsVisible(true)
     const handleMouseLeave = () => setIsVisible(false)
-
-    const addHoverListeners = () => {
-      const hoverElements = document.querySelectorAll('a, button, [role="button"]')
-      hoverElements.forEach((el) => {
-        el.addEventListener('mouseenter', () => setIsHovering(true))
-        el.addEventListener('mouseleave', () => setIsHovering(false))
-      })
+    const pointerSelector = 'a, button, [role="button"], label, summary, select, [data-cursor="pointer"]'
+    const textSelector = 'input:not([type="button"]):not([type="submit"]):not([type="checkbox"]):not([type="radio"]), textarea, [contenteditable="true"], [data-cursor="text"]'
+    const detectHover = (e: MouseEvent) => {
+      const target = e.target as Element | null
+      if (!target || !(target instanceof Element)) {
+        setHoverType('none')
+        return
+      }
+      if (target.closest(pointerSelector)) {
+        setHoverType('pointer')
+      } else if (target.closest(textSelector)) {
+        setHoverType('text')
+      } else {
+        setHoverType('none')
+      }
     }
-
     window.addEventListener('mousemove', moveCursor)
+    window.addEventListener('mouseover', detectHover)
     document.body.addEventListener('mouseenter', handleMouseEnter)
     document.body.addEventListener('mouseleave', handleMouseLeave)
-    
-    // Add listeners after a short delay to ensure DOM is ready
-    const timer = setTimeout(addHoverListeners, 1000)
-
     return () => {
       window.removeEventListener('mousemove', moveCursor)
+      window.removeEventListener('mouseover', detectHover)
       document.body.removeEventListener('mouseenter', handleMouseEnter)
       document.body.removeEventListener('mouseleave', handleMouseLeave)
-      clearTimeout(timer)
     }
   }, [cursorX, cursorY])
-
   // Don't render on server to prevent hydration mismatch
   if (!isMounted) return null
-
+  const isPointer = hoverType === 'pointer'
+  const isText = hoverType === 'text'
   return (
     <>
-      {/* Main cursor dot */}
+      {/* Inner element: dot / text I-beam */}
       <motion.div
         className="pointer-events-none fixed left-0 top-0 z-[9999] hidden md:block"
         style={{
@@ -66,11 +67,13 @@ export function CustomCursor() {
       >
         <motion.div
           animate={{
-            scale: isHovering ? 2.5 : 1,
-            opacity: isVisible ? 1 : 0,
+            width: isText ? 2 : 8,
+            height: isText ? 22 : 8,
+            borderRadius: isText ? 1 : 999,
+            opacity: isVisible && !isPointer ? 1 : 0,
           }}
-          transition={{ duration: 0.2 }}
-          className="flex h-3 w-3 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-accent-gold mix-blend-difference"
+          transition={{ duration: 0.18, ease: 'easeOut' }}
+          className="-translate-x-1/2 -translate-y-1/2 bg-accent-gold mix-blend-difference"
         />
       </motion.div>
       
@@ -84,11 +87,18 @@ export function CustomCursor() {
       >
         <motion.div
           animate={{
-            scale: isHovering ? 1.5 : 1,
-            opacity: isVisible ? 0.5 : 0,
+            width: isPointer ? 56 : 44,
+            height: isPointer ? 56 : 44,
+            opacity: isVisible && !isText ? 0.7 : 0,
           }}
-          transition={{ duration: 0.3 }}
-          className="h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full border border-foreground/30"
+          transition={{ duration: 0.22, ease: 'easeOut' }}
+          style={{
+            backdropFilter: 'invert(1)',
+            WebkitBackdropFilter: 'invert(1)',
+            WebkitMaskImage: `radial-gradient(circle, transparent calc(50% - ${(isPointer ? 3 : 1.5) + 1.5}px), #000 calc(50% - ${(isPointer ? 3 : 1.5) - 0.5}px), #000 calc(50% - 1.5px), transparent 50%)`,
+            maskImage: `radial-gradient(circle, transparent calc(50% - ${(isPointer ? 3 : 1.5) + 1.5}px), #000 calc(50% - ${(isPointer ? 3 : 1.5) - 0.5}px), #000 calc(50% - 1.5px), transparent 50%)`,
+          }}
+          className="-translate-x-1/2 -translate-y-1/2 rounded-full"
         />
       </motion.div>
     </>

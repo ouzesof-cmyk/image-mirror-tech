@@ -1,12 +1,10 @@
 import { motion } from 'framer-motion'
-
 interface MarqueeProps {
   items: string[]
   speed?: number
   direction?: 'left' | 'right'
   className?: string
 }
-
 export function Marquee({ items, speed = 20, direction = 'left', className = '' }: MarqueeProps) {
   const duplicatedItems = [...items, ...items, ...items, ...items]
   

@@ -1,6 +1,5 @@
 import { motion, type Variants } from 'framer-motion'
 import { ReactNode } from 'react'
-
 interface FadeInProps {
   children: ReactNode
   delay?: number
@@ -9,7 +8,6 @@ interface FadeInProps {
   className?: string
   once?: boolean
 }
-
 export function FadeIn({
   children,
   delay = 0,
@@ -25,7 +23,6 @@ export function FadeIn({
     right: { x: -40, y: 0 },
     none: { x: 0, y: 0 },
   }
-
   const variants: Variants = {
     hidden: {
       opacity: 0,
@@ -42,7 +39,6 @@ export function FadeIn({
       },
     },
   }
-
   return (
     <motion.div
       initial="hidden"

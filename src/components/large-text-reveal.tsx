@@ -1,17 +1,14 @@
 import { motion, useInView } from 'framer-motion'
 import { useRef } from 'react'
-
 interface LargeTextRevealProps {
   text: string
   className?: string
 }
-
 export function LargeTextReveal({ text, className = '' }: LargeTextRevealProps) {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: '-10%' })
   
   const words = text.split(' ')
-
   return (
     <h2 ref={ref} className={`font-serif ${className}`}>
       {words.map((word, wordIndex) => (

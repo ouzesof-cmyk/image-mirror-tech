@@ -1,22 +1,22 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Link } from '@/components/link'
+import { Image } from '@/components/image'
 import { Globe } from 'lucide-react'
 import { useLanguage } from '@/lib/language-context'
 import { Language } from '@/lib/translations'
-
+import { ThemeToggle } from '@/components/theme-toggle'
 const languages: { code: Language; label: string; flag: string }[] = [
   { code: 'en', label: 'English', flag: '🇬🇧' },
   { code: 'fr', label: 'Francais', flag: '🇫🇷' },
   { code: 'ar', label: 'العربية', flag: '🇸🇦' },
 ]
-
 export function Navigation() {
   const { language, setLanguage, t, isRTL } = useLanguage()
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isLangMenuOpen, setIsLangMenuOpen] = useState(false)
   const langMenuRef = useRef<HTMLDivElement>(null)
-
   const navLinks = [
     { href: '#work', label: t.nav.work },
     { href: '#about', label: t.nav.about },
@@ -24,7 +24,6 @@ export function Navigation() {
     { href: '#team', label: t.nav.team },
     { href: '#contact', label: t.nav.contact },
   ]
-
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50)
@@ -32,7 +31,6 @@ export function Navigation() {
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
-
   // Prevent body scroll when menu is open
   useEffect(() => {
     if (isMobileMenuOpen) {
@@ -44,7 +42,6 @@ export function Navigation() {
       document.body.style.overflow = ''
     }
   }, [isMobileMenuOpen])
-
   // Close language menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -55,12 +52,10 @@ export function Navigation() {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
-
   const handleLanguageChange = (langCode: Language) => {
     setLanguage(langCode)
     setIsLangMenuOpen(false)
   }
-
   return (
     <>
       <motion.header
@@ -72,31 +67,29 @@ export function Navigation() {
         }`}
       >
         <nav className={`mx-auto flex max-w-7xl items-center justify-between px-6 py-5 lg:px-8 ${isRTL ? 'flex-row-reverse' : ''}`}>
-          <a href="/" className="flex items-center">
-            <img
+          <Link href="/" className="flex items-center">
+            <Image
               src="/images/logo-full.png"
               alt="OUZESOF"
               width={140}
               height={32}
               className="h-8 w-auto"
             />
-          </a>
-
+          </Link>
           {/* Desktop Navigation */}
           <ul className={`hidden items-center gap-10 md:flex ${isRTL ? 'flex-row-reverse' : ''}`}>
             {navLinks.map((link) => (
               <li key={link.href}>
-                <a
+                <Link
                   href={link.href}
                   className="group relative text-xs tracking-[0.15em] text-foreground-secondary transition-colors hover:text-foreground"
                 >
                   {link.label}
                   <span className={`absolute -bottom-1 ${isRTL ? 'right-0' : 'left-0'} h-px w-0 bg-accent-gold transition-all duration-300 group-hover:w-full`} />
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
-
           {/* Language Dropdown & Contact Button - Desktop */}
           <div className={`hidden items-center gap-6 md:flex ${isRTL ? 'flex-row-reverse' : ''}`}>
             {/* Language Dropdown */}
@@ -135,15 +128,16 @@ export function Navigation() {
                 )}
               </AnimatePresence>
             </div>
-
+            {/* Theme Toggle */}
+            <ThemeToggle />
             {/* Contact Button */}
-            <a href="#contact"
+            <Link
+              href="#contact"
               className="border border-foreground px-5 py-2 text-xs tracking-[0.15em] text-foreground transition-all hover:bg-foreground hover:text-background"
             >
               {t.nav.startProject}
-            </a>
+            </Link>
           </div>
-
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -175,7 +169,6 @@ export function Navigation() {
           </button>
         </nav>
       </motion.header>
-
       {/* Mobile Menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
@@ -200,13 +193,13 @@ export function Navigation() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 + index * 0.05 }}
                   >
-                    <a
+                    <Link
                       href={link.href}
                       onClick={() => setIsMobileMenuOpen(false)}
                       className="font-serif text-4xl tracking-[0.1em] text-primary-foreground"
                     >
                       {link.label}
-                    </a>
+                    </Link>
                   </motion.li>
                 ))}
               </motion.ul>
@@ -235,19 +228,19 @@ export function Navigation() {
                   </button>
                 ))}
               </motion.div>
-
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
                 className="mt-8"
               >
-                <a href="#contact"
+                <Link
+                  href="#contact"
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="border border-primary-foreground px-8 py-3 text-sm tracking-[0.15em] text-primary-foreground"
                 >
                   {t.nav.startProject}
-                </a>
+                </Link>
               </motion.div>
               
               <motion.div

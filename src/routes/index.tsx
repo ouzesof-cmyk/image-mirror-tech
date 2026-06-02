@@ -3,6 +3,8 @@ import { Hero } from "@/components/Hero";
 import { LogoMarquee } from "@/components/LogoMarquee";
 import { PortfolioCarousel } from "@/components/PortfolioCarousel";
 import { TeamGrid } from "@/components/TeamGrid";
+import { AboutSection } from "@/components/AboutSection";
+import { ClientsRectangle } from "@/components/ClientsRectangle";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -23,8 +25,10 @@ function Index() {
     <>
       <Hero />
       <LogoMarquee />
+      <AboutSection />
       <PortfolioCarousel />
       <TeamGrid />
+      <ClientsRectangle />
     </>
   );
 }

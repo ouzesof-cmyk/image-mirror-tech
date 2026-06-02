@@ -38,6 +38,8 @@ const AudioCtx = createContext<{
   muted: boolean;
   toggle: () => void;
   click: () => void;
+  musicUrl: string | null;
+  setMusicUrl: (url: string | null) => void;
 } | null>(null);
 
 export function useAudio() {
@@ -92,11 +94,48 @@ export function AppProviders({ children }: { children: ReactNode }) {
 
   // Audio — synthesized ambient drone + click tick using WebAudio (no asset required)
   const [muted, setMuted] = useState(true);
+  const [musicUrl, setMusicUrlState] = useState<string | null>(null);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const saved = localStorage.getItem("ouzesof-music-url");
+    if (saved) setMusicUrlState(saved);
+  }, []);
+  const setMusicUrl = (url: string | null) => {
+    setMusicUrlState(url);
+    if (typeof window === "undefined") return;
+    if (url) localStorage.setItem("ouzesof-music-url", url);
+    else localStorage.removeItem("ouzesof-music-url");
+  };
+  const htmlAudioRef = useRef<HTMLAudioElement | null>(null);
   const audioRef = useRef<{
     ctx?: AudioContext;
     gain?: GainNode;
     nodes?: OscillatorNode[];
   }>({});
+
+  // Manage HTMLAudioElement when a custom track URL is set
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!musicUrl) {
+      if (htmlAudioRef.current) {
+        htmlAudioRef.current.pause();
+        htmlAudioRef.current.src = "";
+        htmlAudioRef.current = null;
+      }
+      return;
+    }
+    const el = new Audio(musicUrl);
+    el.loop = true;
+    el.volume = muted ? 0 : 0.5;
+    htmlAudioRef.current = el;
+    if (!muted) el.play().catch(() => {});
+    return () => {
+      el.pause();
+      el.src = "";
+      htmlAudioRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [musicUrl]);
 
   const ensureAudio = () => {
     if (typeof window === "undefined") return null;
@@ -128,6 +167,16 @@ export function AppProviders({ children }: { children: ReactNode }) {
   const toggle = () => {
     setMuted((prev) => {
       const next = !prev;
+      // Custom track mode
+      if (musicUrl) {
+        const el = htmlAudioRef.current;
+        if (el) {
+          el.volume = next ? 0 : 0.5;
+          if (next) el.pause();
+          else el.play().catch(() => {});
+        }
+        return next;
+      }
       const a = ensureAudio();
       if (!a?.ctx || !a.gain) return next;
       if (a.ctx.state === "suspended") a.ctx.resume();
@@ -159,7 +208,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <ThemeCtx.Provider value={{ theme, toggle: () => setTheme((t) => (t === "dark" ? "light" : "dark")) }}>
       <LangCtx.Provider value={{ lang, setLang, t, dir }}>
-        <AudioCtx.Provider value={{ muted, toggle, click }}>
+        <AudioCtx.Provider value={{ muted, toggle, click, musicUrl, setMusicUrl }}>
           {children}
         </AudioCtx.Provider>
       </LangCtx.Provider>

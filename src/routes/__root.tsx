@@ -15,6 +15,7 @@ import { AppProviders } from "@/providers/AppProviders";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { trackVisit } from "@/lib/analytics";
+import { AuthProvider } from "@/hooks/useAuth";
 
 
 function NotFoundComponent() {
@@ -77,6 +78,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "OUZESOF — Crafting the Digital Future" },
+      { name: "description", content: "Project Heartbeat is a web application for managing and scheduling Zoom meetings and user profiles." },
+      { property: "og:description", content: "Project Heartbeat is a web application for managing and scheduling Zoom meetings and user profiles." },
+      { name: "twitter:description", content: "Project Heartbeat is a web application for managing and scheduling Zoom meetings and user profiles." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ccf18e22-1a58-4526-89bd-c6927a9e2e3c/id-preview-e171e649--7610d2e9-0528-4c6b-bba8-93a04b008a3a.lovable.app-1780187871451.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ccf18e22-1a58-4526-89bd-c6927a9e2e3c/id-preview-e171e649--7610d2e9-0528-4c6b-bba8-93a04b008a3a.lovable.app-1780187871451.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -120,11 +127,13 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AppProviders>
-        <Navbar />
-        <main className="min-h-screen pt-0">
-          <Outlet />
-        </main>
-        <Footer />
+        <AuthProvider>
+          <Navbar />
+          <main className="min-h-screen pt-0">
+            <Outlet />
+          </main>
+          <Footer />
+        </AuthProvider>
       </AppProviders>
     </QueryClientProvider>
   );

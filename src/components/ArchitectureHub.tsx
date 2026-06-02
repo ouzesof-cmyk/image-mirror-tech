@@ -16,32 +16,38 @@ import {
 } from "lucide-react";
 import { useAudio, useT } from "@/providers/AppProviders";
 
-const heroImg =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuABpqc3twweCcIoZTk2bp7Zhg5AxEevn9qaIxDCQsCiCRUX9Z2HICNs6_MxNUdpG_uY7f711wdYU5seviH8tx7_TFoagDJSx5RTH6VfrtdtW9J1VaHKb8Lw9GCo9pEFaAOZ8nTyeguWnFknuozlgeKok3xT7x7SDvygOdreDGFVD4yiQUWWy_GXMzb_6V_8Bu6HZrqHUBZrYIE4Xzq48ofDhRSDaK03hCAn1V3Wujqhbp41XbVabsXC6AtHtnVmTAMIO5NvJC9fyxM";
+import heroImg from "@/assets/arch-hero.jpg";
+import renderImg from "@/assets/arch-render.jpg";
+import blueprintImg from "@/assets/arch-blueprint.jpg";
+import archZenith from "@/assets/arch-zenith.jpg";
+import archPenthouse from "@/assets/arch-penthouse.jpg";
+import archEcoNexus from "@/assets/arch-econexus.jpg";
+import archAurora from "@/assets/arch-aurora.jpg";
+import archVilla from "@/assets/arch-villa.jpg";
+import archSkyline from "@/assets/arch-skyline.jpg";
+import archLumen from "@/assets/arch-lumen.jpg";
+import archHelix from "@/assets/arch-helix.jpg";
+import archMeridian from "@/assets/arch-meridian.jpg";
+import archObsidian from "@/assets/arch-obsidian.jpg";
 
 type OrbitItem = { title: string; sub: string; img: string };
 
 const defaultProjects: OrbitItem[] = [
-  { title: "The Zenith Tower", sub: "Exterior Rendering", img: "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=800&q=80" },
-  { title: "Penthouse X", sub: "Interior Lighting Study", img: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80" },
-  { title: "Eco-Nexus Hub", sub: "Structural Animation", img: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80" },
-  { title: "Aurora Heights", sub: "Mixed-Use Tower", img: "https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=800&q=80" },
-  { title: "Villa Solenne", sub: "Coastal Residence", img: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800&q=80" },
-  { title: "Skyline Atrium", sub: "Corporate HQ", img: "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&q=80" },
-  { title: "Lumen Pavilion", sub: "Cultural Space", img: "https://images.unsplash.com/photo-1487452066049-a710f7296400?w=800&q=80" },
-  { title: "Helix Residences", sub: "Vertical Garden", img: "https://images.unsplash.com/photo-1518005020951-eccb494ad742?w=800&q=80" },
-  { title: "Project Meridian", sub: "Master Plan", img: "https://images.unsplash.com/photo-1496307653780-42ee777d4833?w=800&q=80" },
-  { title: "Studio Obsidian", sub: "Private Atelier", img: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=800&q=80" },
+  { title: "The Zenith Tower", sub: "Exterior Rendering", img: archZenith },
+  { title: "Penthouse X", sub: "Interior Lighting Study", img: archPenthouse },
+  { title: "Eco-Nexus Hub", sub: "Structural Animation", img: archEcoNexus },
+  { title: "Aurora Heights", sub: "Mixed-Use Tower", img: archAurora },
+  { title: "Villa Solenne", sub: "Coastal Residence", img: archVilla },
+  { title: "Skyline Atrium", sub: "Corporate HQ", img: archSkyline },
+  { title: "Lumen Pavilion", sub: "Cultural Space", img: archLumen },
+  { title: "Helix Residences", sub: "Vertical Garden", img: archHelix },
+  { title: "Project Meridian", sub: "Master Plan", img: archMeridian },
+  { title: "Studio Obsidian", sub: "Private Atelier", img: archObsidian },
 ];
 
 const STORAGE_KEY = "ouzesof.orbit.items";
 const ADMIN_KEY = "ouzesof.admin";
 const ADMIN_PASS = "admin";
-
-const renderImg =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuAlcAcc3Y3e9oTiIBfg2NlTat_tulztoClVwVKRXZhaxBOZYZA18dn685xB_j1xp5KZltl1u0JrYbIY2VsYmYwFiX6O-cfxqfHG5pO7ZJFf91LeNo8mag1TRyuKWbax3cO8iAQ0PVgzDVu88JwMVkROBI2g6M5nPNXzE2IwO5_0RswJxMoa0Ek_f5wBr4T-DIsXfmbQRDkmld80fnVa6ca5y36c-AhQCQOhtLyFb5HdQkTfzU4HDIK3pAM250DNjI4jaBvKv9NU8Kw";
-const blueprintImg =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuC2Kyc-UViriu34GbrO1LrITCf8P8zbYpnPsfISZxolIrhKjx3mgyQn2YXu9McTIxyzKY92jV-msDLcVNnddQJ3k0p7r-qXeVYahVfXnaQUmQhYHY-N64a92fEMPAntFEcInPMoKGEdG_-npmlIVMvv27XfMKlLxq9MLcIGU9_TLmBzIVhKEBtgpLa-wrEtOh53hPuQo_vMUqPmzMfJCa9vxmiJOaE-NB7oggmT-HGub_QUx-SmppbHv8eRDdNxdyFzQfKPbsVsOZw";
 
 export function ArchitectureHub() {
   const { click } = useAudio();

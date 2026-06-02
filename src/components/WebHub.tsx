@@ -22,12 +22,9 @@ import {
 } from "lucide-react";
 import { useAudio, useT } from "@/providers/AppProviders";
 
-const portraitImg =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuBBpSa6anfExwl03GGEul7SgsY40w9aLqCPJY_eJikS6dclu2_IvmAIupatUllnG_42nhwxOx9WFkUVhi2wqJoOn3wMSzeJCXsvHCP8HROnciCvsa_S3Uh8c6Sd_7E7bDAGaubiqP0EnT2dqLsz-snKdDgxawIqP1G1la6nBhSitBphyQjXfedCEN52oQcB5SzLoviJL5QXcyiALFFOQIZsVGVGg53VcieerAIzAlt7WkgMB2dXRjfTXp77T8gGf8VJSh43vPmDpuU";
-const fintechImg =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuAPtL1yZ8MQmaQz0RVf2LzIDxOj7Lk3ge1X6AvGutT7Zuu-otK4G4VpTp7zjNxn0-aRIscF3accF69N-fclkyRpK2Uom_9Id9VM2B-KU8N4INzt-SUzsFvAakxL7MTO1XqcEYVoHmkjgPy6kKu30oG-5StmUxKPeew6_YY9dyYpjyUJtQu6FUem8bkFmv4TLhtdiPG2x5U7xCyXPvtKMoxvZk-e9lZJwblXcnblHprKgPu7qsy7qjAq5J_cek0dB4FSOn2YFygw8g0";
-const cyberImg =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuAz4vM3DMjBWqupEJp2ONCMEh0Pv1JIxsJW5zAH5aTLTndKWyfeDyyalICNaB6ZCSSHd_3RCjVU-7ReajH1lMPYWw6kHxcnWafuTz8f0pfBCr3DXzhvA_Lv1nZr-JwlL9OnrO_Z4tIRGLiFxUU3bbhupZO0Kj3a9kcH0Hh5YaFu4B-mvG75KtFctNTNs7A8s3hprew5Tnwe9IzvqsjVXfmWAwhFLXEI2JCs-M7kEhLiBYuKedY_7nPB1MPsTGNyMsBTwlYpHw-FrDc";
+import portraitImg from "@/assets/web-portrait.jpg";
+import fintechImg from "@/assets/web-fintech.jpg";
+import cyberImg from "@/assets/web-cyber.jpg";
 
 type Tab = "monitoring" | "services" | "vault";
 

@@ -48,12 +48,12 @@ export function Footer() {
           <ul className="space-y-3 text-sm">
             <li>
               <a href="mailto:Ouzesof@gmail.com" className="flex items-center gap-2 hover:text-[var(--electric)] transition">
-                <Mail className="h-4 w-4" /> Ouzesof@gmail.com
+                <Mail className="h-4 w-4" /> <span>Ouzesof@gmail.com</span>
               </a>
             </li>
             <li>
               <a href="tel:+213655825342" className="flex items-center gap-2 hover:text-[var(--electric)] transition">
-                <Phone className="h-4 w-4" /> +213 655 825 342
+                <Phone className="h-4 w-4" /> <span>+213 655 825 342</span>
               </a>
             </li>
             <li className="flex items-center gap-2 text-muted-foreground">

@@ -1,477 +1,510 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, Mail, Phone, MapPin, Send } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowUpRight,
+  Sparkles,
+} from "lucide-react";
 import { useAudio, useT } from "@/providers/AppProviders";
-import type { Lang } from "@/lib/i18n";
+import { useBrandingMedia } from "@/lib/brandingMedia";
+import { BRANDING_DISCIPLINES } from "@/lib/brandingDisciplines";
 
-/* ---------- Local i18n (EN / FR / AR) ---------- */
-const L: Record<string, Record<Lang, string>> = {
-  tag: { en: "Branding & Identity", fr: "Marque & Identité", ar: "الهوية البصرية" },
-  managerName: { en: "Yacine Ouzesof", fr: "Yacine Ouzesof", ar: "ياسين أوزسوف" },
-  managerRole: {
-    en: "Director · Brand Identity Studio",
-    fr: "Directeur · Studio d'identité",
-    ar: "مدير · ستوديو الهوية البصرية",
-  },
-  intro: {
-    en: "We design living identity systems — logos, marks, palettes, voice and motion that carry your story across every surface. Each brand is built from research, sketches and obsessive iteration, never from a template.",
-    fr: "Nous concevons des systèmes d'identité vivants — logos, marques, palettes, voix et mouvement qui portent votre histoire sur chaque support. Chaque marque naît de recherches, de croquis et d'itérations obsessionnelles, jamais d'un modèle.",
-    ar: "نصمم أنظمة هوية حيّة — شعارات، علامات، ألوان، صوت وحركة تحمل قصتك عبر كل سطح. كل هوية تُبنى من بحث ورسوم ومراجعات لا تنتهي، وليس من قالب جاهز.",
-  },
-  clientsBar: { en: "Brands we crafted identities for", fr: "Marques que nous avons façonnées", ar: "علامات صنعنا هويتها" },
-  worksTitle: { en: "Selected identity work", fr: "Travaux d'identité sélectionnés", ar: "أعمال هوية مختارة" },
-  worksSub: {
-    en: "Swipe through complete brand systems — from primary mark to packaging.",
-    fr: "Parcourez des systèmes de marque complets — du logo principal au packaging.",
-    ar: "تصفّح أنظمة هوية كاملة — من الشعار الرئيسي إلى التغليف.",
-  },
-  hoverTitle: { en: "Our Clients", fr: "Nos Clients", ar: "عملاؤنا" },
-  hoverSub: {
-    en: "Hover a name to reveal the identity we built for them.",
-    fr: "Survolez un nom pour révéler l'identité que nous avons créée.",
-    ar: "مرّر فوق الاسم لتكشف الهوية التي صنعناها.",
-  },
-  verticalTitle: { en: "Logo Library", fr: "Bibliothèque de logos", ar: "مكتبة الشعارات" },
-  verticalSub: {
-    en: "Scroll — the reel ascends with you.",
-    fr: "Faites défiler — la bande monte avec vous.",
-    ar: "مرّر — يصعد الشريط معك.",
-  },
-  joyBack: {
-    en: "JOY WE SHARED WITH OUR CLIENTS",
-    fr: "LA JOIE PARTAGÉE AVEC NOS CLIENTS",
-    ar: "الفرحة التي تقاسمناها مع عملائنا",
-  },
-  spiralTitle: { en: "Identity Spiral", fr: "Spirale d'identité", ar: "حلزون الهوية" },
-  spiralSub: {
-    en: "A rotating ribbon of marks — one brand at a time.",
-    fr: "Un ruban tournant de marques — une à la fois.",
-    ar: "شريط دوّار من العلامات — هوية تلو الأخرى.",
-  },
-  closing: {
-    en: "We listen to your story deeply — to build an identity that breathes with a living soul, never a passing scribble.",
-    fr: "Nous écoutons votre histoire en profondeur — pour bâtir une identité qui respire d'une âme vivante, jamais un simple gribouillis.",
-    ar: "نحن نُصغي لقصتك بعمق لنبني هوية تنبض بروح حية، وليست مجرد خربشة عابرة.",
-  },
-  contactTitle: { en: "Start your identity", fr: "Lancez votre identité", ar: "ابدأ هويتك" },
-  contactSub: {
-    en: "Tell us about the brand. We reply within one business day.",
-    fr: "Parlez-nous de la marque. Nous répondons sous un jour ouvré.",
-    ar: "حدّثنا عن العلامة. نرد خلال يوم عمل واحد.",
-  },
-  fName: { en: "Full Name", fr: "Nom complet", ar: "الاسم الكامل" },
-  fEmail: { en: "Email", fr: "Email", ar: "البريد الإلكتروني" },
-  fBrand: { en: "Brand Name", fr: "Nom de la marque", ar: "اسم العلامة" },
-  fBrief: { en: "Brief", fr: "Brief", ar: "وصف المشروع" },
-  fSend: { en: "Send brief", fr: "Envoyer le brief", ar: "إرسال الطلب" },
-};
+import heroPortrait from "@/assets/branding/hero-portrait.jpg";
+import work1 from "@/assets/branding/work-1.jpg";
+import work2 from "@/assets/branding/work-2.jpg";
+import work3 from "@/assets/branding/work-3.jpg";
+import work4 from "@/assets/branding/work-4.jpg";
 
-const T = (lang: Lang, k: keyof typeof L) => L[k][lang];
-
-/* ---------- Asset URLs (Unsplash placeholders) ---------- */
-const managerImg =
-  "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=900&q=80";
-
-const works = [
-  "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?auto=format&fit=crop&w=1200&q=80",
-  "https://images.unsplash.com/photo-1561070791-2526d30994b8?auto=format&fit=crop&w=1200&q=80",
-  "https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&w=1200&q=80",
-  "https://images.unsplash.com/photo-1634942537034-2531766767d1?auto=format&fit=crop&w=1200&q=80",
-  "https://images.unsplash.com/photo-1600researcher?auto=format&fit=crop&w=1200&q=80",
-  "https://images.unsplash.com/photo-1558655146-9f40138edfeb?auto=format&fit=crop&w=1200&q=80",
-];
-
-const clientsList = [
-  { name: "SARL World of Building", img: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=900&q=80" },
-  { name: "EURL Palma", img: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=900&q=80" },
-  { name: "Residence Auralis", img: "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=900&q=80" },
-  { name: "Batimex", img: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=900&q=80" },
-  { name: "Studio Nord", img: "https://images.unsplash.com/photo-1517816743773-6e0fd518b4a6?auto=format&fit=crop&w=900&q=80" },
-  { name: "Maison Verre", img: "https://images.unsplash.com/photo-1503602642458-232111445657?auto=format&fit=crop&w=900&q=80" },
-  { name: "Atelier Cinq", img: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=900&q=80" },
-  { name: "Cobalt Group", img: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=900&q=80" },
-];
-
-const verticalReel = [
-  "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1626785774625-0b1c2c4eab67?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1634942537034-2531766767d1?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&w=900&q=80",
-];
-
-const spiralImgs = [
-  "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?auto=format&fit=crop&w=600&q=80",
-  "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&w=600&q=80",
-  "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?auto=format&fit=crop&w=600&q=80",
-  "https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&w=600&q=80",
-  "https://images.unsplash.com/photo-1558655146-9f40138edfeb?auto=format&fit=crop&w=600&q=80",
-  "https://images.unsplash.com/photo-1561070791-2526d30994b8?auto=format&fit=crop&w=600&q=80",
-  "https://images.unsplash.com/photo-1634942537034-2531766767d1?auto=format&fit=crop&w=600&q=80",
-  "https://images.unsplash.com/photo-1517816743773-6e0fd518b4a6?auto=format&fit=crop&w=600&q=80",
-];
-
-const partners = clientsList.map((c) => c.name);
-
-/* ---------- Testimonials per language ---------- */
-const TESTIMONIALS: Record<Lang, { name: string; role: string; text: string }[]> = {
-  en: [
-    { name: "Karim B.", role: "CEO, SARL World of Building", text: "They translated our vision into a mark we are proud to hang on every site." },
-    { name: "Lina H.", role: "Founder, EURL Palma", text: "The identity feels alive — clients recognize us before reading our name." },
-    { name: "Omar T.", role: "Brand Lead, Residence Auralis", text: "Obsessive, kind, and ridiculously talented. The best decision we made this year." },
-    { name: "Sara D.", role: "Director, Batimex", text: "From the first sketch I knew. This is a studio that listens." },
-    { name: "Anis K.", role: "Co-founder, Studio Nord", text: "Every detail — paper weight, kerning, the stamp — was crafted with love." },
-    { name: "Mehdi L.", role: "Owner, Maison Verre", text: "Our brand finally has a soul. Sales conversations changed overnight." },
-    { name: "Rania M.", role: "CMO, Cobalt Group", text: "A rare team that ships beauty AND strategy. Highly recommended." },
-  ],
-  fr: [
-    { name: "Karim B.", role: "PDG, SARL World of Building", text: "Ils ont traduit notre vision en une marque que nous sommes fiers d'afficher partout." },
-    { name: "Lina H.", role: "Fondatrice, EURL Palma", text: "L'identité semble vivante — les clients nous reconnaissent avant de lire notre nom." },
-    { name: "Omar T.", role: "Brand Lead, Residence Auralis", text: "Obsessionnels, gentils et terriblement talentueux. La meilleure décision de l'année." },
-    { name: "Sara D.", role: "Directrice, Batimex", text: "Dès le premier croquis, je savais. C'est un studio qui écoute." },
-    { name: "Anis K.", role: "Cofondateur, Studio Nord", text: "Chaque détail — grammage, interlettrage, le tampon — a été travaillé avec amour." },
-    { name: "Mehdi L.", role: "Propriétaire, Maison Verre", text: "Notre marque a enfin une âme. Les conversations commerciales ont changé du jour au lendemain." },
-    { name: "Rania M.", role: "CMO, Cobalt Group", text: "Une équipe rare qui livre beauté ET stratégie. Hautement recommandée." },
-  ],
-  ar: [
-    { name: "كريم ب.", role: "الرئيس التنفيذي، SARL World of Building", text: "ترجموا رؤيتنا إلى علامة نفخر بتعليقها في كل موقع." },
-    { name: "لينا ه.", role: "مؤسسة، EURL Palma", text: "الهوية تبدو حيّة — العملاء يعرفوننا قبل قراءة الاسم." },
-    { name: "عمر ت.", role: "مسؤول العلامة، Residence Auralis", text: "مهووسون بالتفاصيل، لطفاء وموهوبون جداً. أفضل قرار اتخذناه هذا العام." },
-    { name: "سارة د.", role: "مديرة، Batimex", text: "منذ أول رسمة عرفت. هذا ستوديو يُصغي حقاً." },
-    { name: "أنيس ك.", role: "شريك مؤسس، Studio Nord", text: "كل تفصيل — الورق، تباعد الحروف، الختم — صُنع بحب." },
-    { name: "مهدي ل.", role: "صاحب، Maison Verre", text: "علامتنا أخيراً لها روح. تغيرت محادثات المبيعات بين ليلة وضحاها." },
-    { name: "رانية م.", role: "مديرة التسويق، Cobalt Group", text: "فريق نادر يقدم الجمال والاستراتيجية معاً. أنصح به بشدة." },
-  ],
-};
-
-/* ---------- Component ---------- */
-export function BrandingHub() {
+/* ============================================================
+   Hero
+   ============================================================ */
+function Hero() {
   const { click } = useAudio();
-  const { lang, dir } = useT();
-  const [hoverIdx, setHoverIdx] = useState<number | null>(null);
+  const { t } = useT();
+  return (
+    <section className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+      <div className="lg:col-span-5 flex justify-center">
+        <div className="relative w-64 h-80 md:w-80 md:h-96 rounded-3xl panel-convex p-4 group">
+          <div className="w-full h-full rounded-2xl overflow-hidden relative">
+            <img
+              src={heroPortrait}
+              alt="Graphic Design Direction"
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[var(--electric)]/30 via-transparent to-[var(--halogen)]/10" />
+          </div>
+          <div className="absolute -z-10 inset-0 rounded-3xl blur-3xl bg-[var(--electric)]/20 group-hover:bg-[var(--electric)]/40 transition-all duration-700" />
+        </div>
+      </div>
 
-  /* scroll progress for vertical reel + testimonials */
-  const reelSection = useRef<HTMLDivElement>(null);
-  const reelTrack = useRef<HTMLDivElement>(null);
-  const testiSection = useRef<HTMLDivElement>(null);
-  const testiTrack = useRef<HTMLDivElement>(null);
-  const spiralSection = useRef<HTMLDivElement>(null);
-  const spiralTrack = useRef<HTMLDivElement>(null);
+      <div className="lg:col-span-7 space-y-6">
+        <span className="inline-flex items-center gap-2 text-[10px] font-mono font-bold tracking-[0.3em] uppercase text-[var(--electric)] bg-[var(--electric)]/10 px-3 py-1 rounded-full">
+          <Sparkles className="h-3 w-3" /> {t("branding.hero.tag")}
+        </span>
+        <h1 className="font-display font-black text-4xl sm:text-5xl lg:text-6xl leading-[1.05] tracking-[-0.03em]">
+          {t("branding.hero.h1.a")}
+          <span className="italic text-gradient">{t("branding.hero.h1.b")}</span>.
+        </h1>
+        <p className="text-lg text-muted-foreground max-w-2xl leading-relaxed">
+          {t("branding.hero.desc")}
+        </p>
+        <div className="flex flex-wrap gap-4 pt-2">
+          <Link
+            to="/contact"
+            onClick={click}
+            className="px-8 py-4 bg-primary text-primary-foreground font-bold text-[10px] tracking-[0.2em] uppercase rounded-xl hover:-translate-y-1 transition"
+          >
+            {t("branding.hero.cta.start")}
+          </Link>
+          <a
+            href="#works"
+            onClick={click}
+            className="px-8 py-4 panel-convex font-bold text-[10px] tracking-[0.2em] uppercase rounded-xl"
+          >
+            {t("branding.hero.cta.works")}
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
+   Disciplines
+   ============================================================ */
+function Disciplines() {
+  const { t } = useT();
+  const { click } = useAudio();
+  return (
+    <section className="space-y-8">
+      <div className="flex items-end justify-between flex-wrap gap-4">
+        <div>
+          <p className="text-xs font-bold tracking-[0.3em] uppercase text-[var(--electric)]">
+            {t("branding.disc.tag")}
+          </p>
+          <h2 className="mt-2 font-display text-3xl sm:text-4xl font-black tracking-[-0.03em]">
+            {t("branding.disc.title")}
+          </h2>
+        </div>
+        <span className="text-[10px] font-mono uppercase tracking-[0.3em] text-muted-foreground">
+          {t("branding.disc.services")}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {BRANDING_DISCIPLINES.map(({ Icon, n, slug }, i) => (
+          <Link
+            key={n}
+            to="/portfolio/branding/$discipline"
+            params={{ discipline: slug }}
+            onClick={click}
+            className="group panel-convex rounded-2xl p-6 hover:-translate-y-1 transition duration-500"
+          >
+            <div className="flex items-start justify-between">
+              <div className="h-11 w-11 rounded-xl panel-concave flex items-center justify-center text-[var(--electric)]">
+                <Icon className="h-5 w-5" />
+              </div>
+              <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                0{i + 1}
+              </span>
+            </div>
+            <h3 className="mt-5 font-display text-lg font-bold tracking-tight">
+              {t(`branding.disc.${n}.t`)}
+            </h3>
+            <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+              {t(`branding.disc.${n}.d`)}
+            </p>
+            <span className="mt-4 inline-flex items-center gap-1 text-[10px] font-mono font-bold uppercase tracking-[0.2em] text-[var(--electric)] opacity-0 group-hover:opacity-100 transition">
+              {t("branding.d.hero.tag")} <ArrowUpRight className="h-3 w-3" />
+            </span>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+
+/* ============================================================
+   Selected Works
+   ============================================================ */
+const WORKS = [
+  { src: work1, title: "Confietár", n: 1, year: "2024" },
+  { src: work2, title: "5G Atelier", n: 2, year: "2024" },
+  { src: work3, title: "Cuscand", n: 3, year: "2023" },
+  { src: work4, title: "Wsen Tower", n: 4, year: "2023" },
+];
+
+function SelectedWorks() {
+  const { t } = useT();
+  return (
+    <section id="works" className="space-y-8">
+      <div className="flex items-end justify-between flex-wrap gap-4">
+        <div>
+          <p className="text-xs font-bold tracking-[0.3em] uppercase text-[var(--electric)]">
+            {t("branding.works.tag")}
+          </p>
+          <h2 className="mt-2 font-display text-3xl sm:text-4xl font-black tracking-[-0.03em]">
+            {t("branding.works.title")}
+          </h2>
+        </div>
+        <span className="text-[10px] font-mono uppercase tracking-[0.3em] text-muted-foreground">
+          {t("branding.works.archive")}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {WORKS.map((w, i) => (
+          <figure
+            key={w.title}
+            className="group relative panel-convex rounded-3xl overflow-hidden"
+            style={{ animationDelay: `${i * 80}ms` }}
+          >
+            <div className="aspect-[4/5] overflow-hidden">
+              <img
+                src={w.src}
+                alt={w.title}
+                loading="lazy"
+                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+            </div>
+            <figcaption className="absolute inset-x-0 bottom-0 p-5 flex items-end justify-between bg-gradient-to-t from-black/80 via-black/30 to-transparent text-white">
+              <div>
+                <p className="text-[10px] font-mono uppercase tracking-[0.25em] opacity-80">
+                  {t(`branding.works.${w.n}.tag`)} · {w.year}
+                </p>
+                <h3 className="mt-1 font-display text-xl sm:text-2xl font-bold tracking-tight">
+                  {w.title}
+                </h3>
+              </div>
+              <span className="h-10 w-10 rounded-full bg-white text-black grid place-items-center group-hover:rotate-45 transition">
+                <ArrowUpRight className="h-4 w-4" />
+              </span>
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
+   Process
+   ============================================================ */
+const PROCESS = [
+  { step: "01", n: 1 },
+  { step: "02", n: 2 },
+  { step: "03", n: 3 },
+  { step: "04", n: 4 },
+];
+
+function Process() {
+  const { t } = useT();
+  return (
+    <section className="space-y-8">
+      <div className="flex items-end justify-between flex-wrap gap-4">
+        <div>
+          <p className="text-xs font-bold tracking-[0.3em] uppercase text-[var(--electric)]">
+            {t("branding.proc.tag")}
+          </p>
+          <h2 className="mt-2 font-display text-3xl sm:text-4xl font-black tracking-[-0.03em]">
+            {t("branding.proc.title")}
+          </h2>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {PROCESS.map((p) => (
+          <div
+            key={p.step}
+            className="panel-concave rounded-2xl p-6 space-y-3"
+          >
+            <span className="text-[10px] font-mono uppercase tracking-[0.3em] text-[var(--electric)]">
+              {p.step}
+            </span>
+            <h3 className="font-display text-xl font-bold tracking-tight">
+              {t(`branding.proc.${p.n}.t`)}
+            </h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {t(`branding.proc.${p.n}.d`)}
+            </p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
+   Branding Carousel (admin-managed)
+   ============================================================ */
+function BrandingCarousel() {
+  const { t } = useT();
+  const { store, hydrated } = useBrandingMedia();
+  const items = store.carousel;
+  const [index, setIndex] = useState(0);
 
   useEffect(() => {
-    const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
-    const onScroll = () => {
-      const vh = window.innerHeight;
-      const update = (
-        sec: HTMLDivElement | null,
-        track: HTMLDivElement | null,
-        mode: "up" | "spiral" | "pin"
-      ) => {
-        if (!sec || !track) return;
-        const r = sec.getBoundingClientRect();
-        if (mode === "pin") {
-          // progress through the pinned range (sticky engaged → released)
-          const p = clamp(-r.top / Math.max(1, r.height - vh));
-          // rotate the wheel a full turn (360°) across the pinned range
-          track.style.transform = `rotateX(${p * 360}deg)`;
-          return;
-        }
+    if (items.length <= 1) return;
+    const id = setInterval(() => {
+      setIndex((i) => (i + 1) % items.length);
+    }, 5000);
+    return () => clearInterval(id);
+  }, [items.length]);
 
+  useEffect(() => {
+    if (index >= items.length && items.length > 0) setIndex(0);
+  }, [items.length, index]);
 
-        const total = r.height + vh;
-        const passed = Math.min(Math.max(vh - r.top, 0), total);
-        const p = passed / total; // 0..1
-        if (mode === "up") {
-          const max = track.scrollHeight - sec.clientHeight + 200;
-          track.style.transform = `translate3d(0, ${-p * max}px, 0)`;
-        } else {
-          const rot = p * 720;
-          const lift = p * 400;
-          track.style.transform = `translate3d(0, ${-lift}px, 0) rotate(${rot}deg)`;
-        }
-      };
-      update(reelSection.current, reelTrack.current, "pin");
-      update(testiSection.current, testiTrack.current, "up");
-      update(spiralSection.current, spiralTrack.current, "spiral");
-    };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-    };
-  }, []);
+  if (!hydrated || items.length === 0) return null;
 
+  const go = (dir: 1 | -1) =>
+    setIndex((i) => (i + dir + items.length) % items.length);
 
-  /* Testimonials scattered placement (deterministic) */
-  const scattered = useMemo(() => {
-    const list = TESTIMONIALS[lang];
-    const seeds = [
-      { left: "4%", rot: -4, w: "300px" },
-      { left: "62%", rot: 3, w: "320px" },
-      { left: "24%", rot: -2, w: "280px" },
-      { left: "70%", rot: -3, w: "300px" },
-      { left: "8%", rot: 4, w: "310px" },
-      { left: "44%", rot: -1, w: "330px" },
-      { left: "55%", rot: 2, w: "290px" },
-    ];
-    return list.map((t, i) => ({ ...t, ...seeds[i % seeds.length], top: 120 + i * 260 }));
-  }, [lang]);
+  const offset = (i: number) => {
+    const n = items.length;
+    let d = i - index;
+    if (d > n / 2) d -= n;
+    if (d < -n / 2) d += n;
+    return d;
+  };
 
   return (
-    <div className="pt-28 pb-24" dir={dir}>
-      <div className="mx-auto max-w-7xl px-6">
+    <section className="space-y-10">
+      <div className="text-center max-w-2xl mx-auto space-y-3">
+        <p className="text-xs font-bold tracking-[0.3em] uppercase text-[var(--electric)]">
+          {t("branding.car.tag")}
+        </p>
+        <h2 className="font-display text-3xl sm:text-5xl font-black tracking-[-0.03em]">
+          {t("branding.car.title.a")}<span className="italic text-gradient">{t("branding.car.title.b")}</span>
+        </h2>
+        <p className="text-muted-foreground">
+          {t("branding.car.desc")}
+        </p>
+      </div>
+
+      <div
+        className="relative mx-auto flex h-[58vh] min-h-[420px] w-full items-center justify-center"
+        style={{ perspective: "1800px" }}
+      >
+        <div className="relative h-full w-full">
+          {items.map((m, i) => {
+            const d = offset(i);
+            const abs = Math.abs(d);
+            const visible = abs <= 3;
+            const isCenter = d === 0;
+            const translateX = d * 26;
+            const translateZ = -abs * 80;
+            const rotateY = d === 0 ? 0 : d > 0 ? -22 : 22;
+            const scale = Math.max(0.5, 1 - abs * 0.13);
+            const z = 20 - abs;
+            const opacity = abs >= 3 ? 0 : 1;
+
+            return (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => setIndex(i)}
+                aria-label={`Slide ${i + 1}`}
+                className="absolute left-1/2 top-1/2 overflow-hidden rounded-3xl panel-convex transition-all duration-[800ms] ease-[cubic-bezier(0.76,0,0.24,1)]"
+                style={{
+                  width: "clamp(220px, 26vw, 400px)",
+                  height: "clamp(320px, 60vh, 580px)",
+                  transform: `translate3d(-50%, -50%, 0) translateX(${translateX}%) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
+                  zIndex: z,
+                  opacity,
+                  pointerEvents: visible ? "auto" : "none",
+                  boxShadow: isCenter
+                    ? "var(--shadow-aura)"
+                    : "0 20px 40px -20px rgba(0,0,0,0.4)",
+                }}
+              >
+                <img
+                  src={m.url}
+                  alt={m.caption || `Slide ${i + 1}`}
+                  loading="lazy"
+                  className="h-full w-full object-cover"
+                  draggable={false}
+                />
+                {!isCenter && (
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0"
+                    style={{
+                      background: `rgba(10,10,20,${Math.min(0.45, abs * 0.18)})`,
+                    }}
+                  />
+                )}
+                {isCenter && m.caption && (
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 p-5 text-white bg-gradient-to-t from-black/70 to-transparent">
+                    <p className="text-[10px] font-mono uppercase tracking-[0.25em]">
+                      {m.caption}
+                    </p>
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {items.length > 1 && (
+          <>
+            <button
+              onClick={() => go(-1)}
+              aria-label="Previous slide"
+              className="absolute left-2 top-1/2 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full panel-convex text-foreground hover:text-[var(--electric)] transition md:left-6"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => go(1)}
+              aria-label="Next slide"
+              className="absolute right-2 top-1/2 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full panel-convex text-foreground hover:text-[var(--electric)] transition md:right-6"
+            >
+              <ArrowUpRight className="h-4 w-4" />
+            </button>
+          </>
+        )}
+      </div>
+
+      {items.length > 1 && (
+        <div className="flex justify-center gap-2">
+          {items.map((m, i) => (
+            <button
+              key={m.id}
+              onClick={() => setIndex(i)}
+              aria-label={`Go to slide ${i + 1}`}
+              className="h-1.5 rounded-full transition-all"
+              style={{
+                width: i === index ? 32 : 10,
+                background:
+                  i === index
+                    ? "var(--electric)"
+                    : "color-mix(in oklab, var(--foreground) 25%, transparent)",
+              }}
+            />
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+/* ============================================================
+   Branding Gallery (admin-managed)
+   ============================================================ */
+function BrandingGallery() {
+  const { t } = useT();
+  const { store, hydrated } = useBrandingMedia();
+  const items = store.gallery;
+  if (!hydrated || items.length === 0) return null;
+
+  return (
+    <section className="space-y-8">
+      <div className="flex items-end justify-between flex-wrap gap-4">
+        <div>
+          <p className="text-xs font-bold tracking-[0.3em] uppercase text-[var(--electric)]">
+            {t("branding.gal.tag")}
+          </p>
+          <h2 className="mt-2 font-display text-3xl sm:text-4xl font-black tracking-[-0.03em]">
+            {t("branding.gal.title")}
+          </h2>
+        </div>
+        <span className="text-[10px] font-mono uppercase tracking-[0.3em] text-muted-foreground">
+          ({String(items.length).padStart(2, "0")} items)
+        </span>
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        {items.map((m) => (
+          <figure
+            key={m.id}
+            className="group relative aspect-square overflow-hidden rounded-2xl panel-convex p-2"
+          >
+            <div className="relative h-full w-full overflow-hidden rounded-xl">
+              <img
+                src={m.url}
+                alt={m.caption || ""}
+                loading="lazy"
+                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+              />
+              {m.caption && (
+                <figcaption className="absolute inset-x-0 bottom-0 translate-y-full bg-gradient-to-t from-black/80 to-transparent p-3 text-white text-[10px] font-mono uppercase tracking-[0.2em] transition-transform duration-500 group-hover:translate-y-0">
+                  {m.caption}
+                </figcaption>
+              )}
+            </div>
+          </figure>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
+   CTA
+   ============================================================ */
+function CTA() {
+  const { click } = useAudio();
+  const { t } = useT();
+  return (
+    <section className="panel-convex rounded-3xl p-10 sm:p-14 text-center glow-aura">
+      <p className="text-xs font-bold tracking-[0.3em] uppercase text-[var(--electric)]">
+        {t("branding.cta.tag")}
+      </p>
+      <h2 className="mt-3 font-display text-3xl sm:text-5xl font-black tracking-[-0.03em]">
+        {t("branding.cta.title")}
+      </h2>
+      <p className="mt-4 max-w-xl mx-auto text-muted-foreground">
+        {t("branding.cta.desc")}
+      </p>
+      <div className="mt-8 flex flex-wrap gap-3 justify-center">
+        <Link
+          to="/contact"
+          onClick={click}
+          className="px-8 py-4 bg-primary text-primary-foreground font-bold text-[10px] tracking-[0.2em] uppercase rounded-xl hover:-translate-y-1 transition"
+        >
+          {t("branding.cta.start")}
+        </Link>
         <Link
           to="/"
           onClick={click}
-          className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-[0.3em] text-muted-foreground hover:text-[var(--electric)] transition mb-6"
+          className="px-8 py-4 panel-convex font-bold text-[10px] tracking-[0.2em] uppercase rounded-xl inline-flex items-center gap-2"
+        >
+          <ArrowLeft className="h-3.5 w-3.5 rtl:rotate-180" /> {t("branding.cta.home")}
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
+   Root
+   ============================================================ */
+export function BrandingHub() {
+  const { click } = useAudio();
+
+  return (
+    <div className="pt-28 pb-24">
+      <div className="mx-auto max-w-7xl px-6 space-y-20">
+        <Link
+          to="/"
+          onClick={click}
+          className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-[0.3em] text-muted-foreground hover:text-[var(--electric)] transition"
         >
           <ArrowLeft className="h-3.5 w-3.5 rtl:rotate-180" /> /portfolio
         </Link>
 
-        {/* 1. Manager + intro */}
-        <section className="grid grid-cols-1 lg:grid-cols-5 gap-10 items-center mb-20">
-          <div className="lg:col-span-2">
-            <div className="relative rounded-3xl panel-convex overflow-hidden aspect-[4/5] glow-aura">
-              <img src={managerImg} alt={T(lang, "managerName")} className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent" />
-              <div className="absolute bottom-6 inset-x-6">
-                <p className="font-display text-2xl font-bold text-white">{T(lang, "managerName")}</p>
-                <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-white/70 mt-1">
-                  {T(lang, "managerRole")}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="lg:col-span-3 flex flex-col gap-6">
-            <span className="self-start panel-concave rounded-full px-5 py-2 text-[10px] font-mono font-bold uppercase tracking-[0.3em] text-[var(--electric)]">
-              {T(lang, "tag")}
-            </span>
-            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black tracking-[-0.03em] leading-[1.05]">
-              {T(lang, "tag")}
-            </h1>
-            <p className="text-lg text-muted-foreground leading-relaxed">{T(lang, "intro")}</p>
-          </div>
-        </section>
-
-        {/* 2. Clients marquee */}
-        <section className="mb-24">
-          <p className="text-center text-xs font-bold tracking-[0.3em] uppercase text-muted-foreground mb-6">
-            {T(lang, "clientsBar")}
-          </p>
-          <div className="relative overflow-hidden border-y border-border/40 py-6">
-            <div className="pointer-events-none absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-background to-transparent z-10" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-background to-transparent z-10" />
-            <div className="flex w-max animate-marquee gap-12 px-6">
-              {[...partners, ...partners].map((n, i) => (
-                <div key={i} className="flex items-center gap-3 whitespace-nowrap text-lg font-bold tracking-tight text-muted-foreground">
-                  <span className="inline-block h-2 w-2 rounded-full bg-[var(--electric)]/60" />
-                  {n}
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* 3. Works carousel (horizontal scroll snap) */}
-        <section className="mb-24">
-          <div className="flex items-end justify-between mb-6 gap-4 flex-wrap">
-            <div>
-              <h2 className="font-display text-3xl sm:text-4xl font-black tracking-[-0.02em]">{T(lang, "worksTitle")}</h2>
-              <p className="mt-2 text-muted-foreground">{T(lang, "worksSub")}</p>
-            </div>
-          </div>
-          <div className="flex gap-5 overflow-x-auto snap-x snap-mandatory pb-4 -mx-6 px-6 scrollbar-thin">
-            {works.map((src, i) => (
-              <div key={i} className="snap-center shrink-0 w-[78vw] sm:w-[420px] aspect-[4/5] rounded-3xl panel-convex overflow-hidden group">
-                <img src={src} alt={`Brand work ${i + 1}`} className="w-full h-full object-cover transition duration-700 group-hover:scale-105" />
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* 4. Clients list — hover shows image */}
-        <section className="mb-24">
-          <div className="mb-8">
-            <h2 className="font-display text-3xl sm:text-4xl font-black tracking-[-0.02em]">{T(lang, "hoverTitle")}</h2>
-            <p className="mt-2 text-muted-foreground">{T(lang, "hoverSub")}</p>
-          </div>
-          <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-            <ul className="divide-y divide-border/40">
-              {clientsList.map((c, i) => (
-                <li
-                  key={c.name}
-                  onMouseEnter={() => setHoverIdx(i)}
-                  onMouseLeave={() => setHoverIdx(null)}
-                  className={`py-5 cursor-pointer font-display text-2xl sm:text-4xl font-black tracking-tight transition ${
-                    hoverIdx === i ? "text-[var(--electric)] translate-x-2 rtl:-translate-x-2" : "text-muted-foreground/60 hover:text-foreground"
-                  }`}
-                >
-                  {c.name}
-                </li>
-              ))}
-            </ul>
-            <div className="hidden lg:block sticky top-28 h-[460px] rounded-3xl panel-convex overflow-hidden">
-              {clientsList.map((c, i) => (
-                <img
-                  key={c.name}
-                  src={c.img}
-                  alt={c.name}
-                  className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
-                    hoverIdx === i ? "opacity-100" : "opacity-0"
-                  }`}
-                />
-              ))}
-              {hoverIdx === null && (
-                <div className="absolute inset-0 flex items-center justify-center text-muted-foreground text-sm font-mono uppercase tracking-[0.3em]">
-                  ← {T(lang, "hoverSub")}
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* 5. Vertical rotating wheel — pinned, makes a full turn as you scroll */}
-        <section className="mb-24">
-          <div className="mb-6">
-            <h2 className="font-display text-3xl sm:text-4xl font-black tracking-[-0.02em]">{T(lang, "verticalTitle")}</h2>
-            <p className="mt-2 text-muted-foreground">{T(lang, "verticalSub")}</p>
-          </div>
-          {/* Outer wrapper length = how long the pin (and the full rotation) lasts */}
-          <div ref={reelSection} className="relative" style={{ height: "220vh" }}>
-            <div className="sticky top-0 h-screen flex items-center justify-center rounded-3xl panel-concave overflow-hidden">
-              <div
-                className="relative"
-                style={{ perspective: "1400px", width: "min(560px, 90%)", height: "520px" }}
-              >
-                <div
-                  ref={reelTrack}
-                  className="absolute inset-0 will-change-transform"
-                  style={{ transformStyle: "preserve-3d", transformOrigin: "center center" }}
-                >
-                  {verticalReel.map((src, i) => {
-                    const n = verticalReel.length;
-                    const angle = (360 / n) * i;
-                    const radius = 200;
-                    return (
-                      <div
-                        key={i}
-                        className="absolute inset-0 m-auto rounded-2xl overflow-hidden panel-convex"
-                        style={{
-                          transform: `rotateX(${angle}deg) translateZ(${radius}px)`,
-                          backfaceVisibility: "hidden",
-                        }}
-                      >
-                        <img src={src} alt={`Logo ${i + 1}`} className="w-full h-full object-cover" />
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-background to-transparent" />
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background to-transparent" />
-            </div>
-          </div>
-        </section>
-
-
-        {/* 6. Testimonials — fixed background phrase, scattered scrolling cards */}
-        <section ref={testiSection} className="relative mb-24 h-[150vh] rounded-3xl panel-concave overflow-hidden">
-          <div className="sticky top-0 h-screen flex items-center justify-center pointer-events-none">
-            <h2 className="font-display text-[14vw] sm:text-[10vw] font-black tracking-[-0.04em] text-foreground/5 text-center leading-none px-4">
-              {T(lang, "joyBack")}
-            </h2>
-          </div>
-          <div ref={testiTrack} className="absolute inset-x-0 top-0 will-change-transform">
-            <div className="relative w-full" style={{ height: scattered.length * 280 + 200 }}>
-              {scattered.map((t, i) => (
-                <div
-                  key={i}
-                  className="absolute panel-convex rounded-2xl p-5 shadow-xl backdrop-blur-md bg-background/60"
-                  style={{
-                    left: t.left,
-                    top: t.top,
-                    width: t.w,
-                    transform: `rotate(${t.rot}deg)`,
-                  }}
-                >
-                  <p className="text-sm leading-relaxed">"{t.text}"</p>
-                  <div className="mt-3 text-xs font-mono uppercase tracking-[0.2em] text-[var(--electric)]">
-                    {t.name}
-                  </div>
-                  <div className="text-[10px] text-muted-foreground">{t.role}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* 7. Spiral carousel */}
-        <section className="mb-24">
-          <div className="mb-6">
-            <h2 className="font-display text-3xl sm:text-4xl font-black tracking-[-0.02em]">{T(lang, "spiralTitle")}</h2>
-            <p className="mt-2 text-muted-foreground">{T(lang, "spiralSub")}</p>
-          </div>
-          <div ref={spiralSection} className="relative h-[140vh] rounded-3xl panel-concave overflow-hidden">
-            <div className="sticky top-0 h-screen flex items-center justify-center">
-              <div
-                ref={spiralTrack}
-                className="relative w-[420px] h-[420px] will-change-transform"
-                style={{ transformOrigin: "center center" }}
-              >
-                {spiralImgs.map((src, i) => {
-                  const angle = (i / spiralImgs.length) * Math.PI * 2;
-                  const r = 180;
-                  const x = Math.cos(angle) * r;
-                  const y = Math.sin(angle) * r;
-                  return (
-                    <div
-                      key={i}
-                      className="absolute w-32 h-32 -translate-x-1/2 -translate-y-1/2 rounded-2xl overflow-hidden panel-convex"
-                      style={{ left: `calc(50% + ${x}px)`, top: `calc(50% + ${y}px)` }}
-                    >
-                      <img src={src} alt={`spiral ${i}`} className="w-full h-full object-cover" />
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 8. Closing phrase */}
-        <section className="mb-24 text-center max-w-4xl mx-auto">
-          <p className="font-display text-2xl sm:text-4xl font-black tracking-[-0.02em] leading-tight text-gradient">
-            {T(lang, "closing")}
-          </p>
-        </section>
-
-        {/* 9. Contact */}
-        <section className="panel-convex rounded-3xl p-8 sm:p-12 grid grid-cols-1 lg:grid-cols-2 gap-10">
-          <div className="space-y-6">
-            <h2 className="font-display text-3xl sm:text-4xl font-black tracking-[-0.02em]">{T(lang, "contactTitle")}</h2>
-            <p className="text-muted-foreground">{T(lang, "contactSub")}</p>
-            <ul className="space-y-3 text-sm pt-4">
-              <li className="flex items-center gap-3"><Mail className="h-4 w-4 text-[var(--electric)]" /> Ouzesof@gmail.com</li>
-              <li className="flex items-center gap-3"><Phone className="h-4 w-4 text-[var(--electric)]" /> +213 655 825 342</li>
-              <li className="flex items-center gap-3"><MapPin className="h-4 w-4 text-[var(--electric)]" /> Annaba · Algeria</li>
-            </ul>
-          </div>
-          <form
-            onSubmit={(e) => { e.preventDefault(); click(); }}
-            className="space-y-4"
-          >
-            <input className="w-full rounded-2xl panel-concave bg-transparent px-5 py-4 text-sm outline-none focus:ring-2 focus:ring-[var(--electric)]" placeholder={T(lang, "fName")} />
-            <input type="email" className="w-full rounded-2xl panel-concave bg-transparent px-5 py-4 text-sm outline-none focus:ring-2 focus:ring-[var(--electric)]" placeholder={T(lang, "fEmail")} />
-            <input className="w-full rounded-2xl panel-concave bg-transparent px-5 py-4 text-sm outline-none focus:ring-2 focus:ring-[var(--electric)]" placeholder={T(lang, "fBrand")} />
-            <textarea rows={5} className="w-full rounded-2xl panel-concave bg-transparent px-5 py-4 text-sm outline-none focus:ring-2 focus:ring-[var(--electric)] resize-none" placeholder={T(lang, "fBrief")} />
-            <button type="submit" className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground rounded-full font-bold text-[10px] tracking-[0.2em] uppercase hover:scale-105 transition">
-              <Send className="h-4 w-4" /> {T(lang, "fSend")}
-            </button>
-          </form>
-        </section>
+        <Hero />
+        <Disciplines />
+        <SelectedWorks />
+        <Process />
+        <BrandingCarousel />
+        <BrandingGallery />
+        <CTA />
       </div>
     </div>
   );
 }
+
+export default BrandingHub;

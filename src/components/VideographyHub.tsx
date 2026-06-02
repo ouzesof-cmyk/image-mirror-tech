@@ -12,9 +12,7 @@ import {
   X,
 } from "lucide-react";
 import { useAudio, useT } from "@/providers/AppProviders";
-import type { PortfolioItem, PortfolioMedia } from "@/components/admin/PortfolioManager";
-
-const PORTFOLIO_STORAGE_KEY = "ouzesof:portfolio:v1";
+import { usePortfolio, type PortfolioMedia } from "@/lib/portfolioStore";
 
 type GalleryEntry = {
   id: string;
@@ -36,54 +34,36 @@ function toEmbed(url: string): { type: "iframe" | "video" | "image" | "link"; sr
 }
 
 
-const heroImg =
-  "https://www.youtube.com/watch?v=g7xkVEWrX8E";
-const dopImg =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuBRdHUPjbZ2KZBcSeFbpaei-0BD1_IvvpEG3rp-UYNGsraS3cPD64UGKQIMwsnLVsXn4WHmnFyvxayat-XGkHlu61yhvn7b-DNzFcdXsmuTPO4ZP4W2uVNFLaWELB_Kkg_C0IEKPAU-yKkHTj2FfCboLJ4nRzkKbGFSNdAhxsidkL0UZoXwbizWw0ZPRfiDAwyajGiLt4plElEu40afJyRkkcL9vUPPXOOfTxu2m84DueiDvS23BKZesMWu2yVDFO8EKg5kf09FxjI";
-const setImg =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuC29hklKoWBayE8yncyOYkzZAKMFEeDqcO6VZb4Flk6g-Ecsgy16POK4G25PU4dAdlWPqATwowXfMOn2ReOUnThIKib8AUX-YtWMnYNeMzrdffdaXHNPtivB1g98vSuAHxxxXqr4C4nNBab9X6LJtWYc-z-iRqNcvjsqcNCzJPm_qJYUEQ0lpjtXDMxb5yn0gkQea7xqic1LWqZd_f1yOHxkZ0u-YbAcA7w_b3V7bRZLlINmuXEhqb1tLs2xLWwLaXxACq4yIlBCbs";
+import heroImg from "@/assets/video-hero.jpg";
+import dopImg from "@/assets/video-dop.jpg";
+import setImg from "@/assets/video-set.jpg";
 
 export function VideographyHub() {
   const { click } = useAudio();
   const { t } = useT();
   const [progress, setProgress] = useState(0.74);
   const visualizerRef = useRef<HTMLDivElement>(null);
-  const [gallery, setGallery] = useState<GalleryEntry[]>([]);
+  const { store: portfolioStore } = usePortfolio();
   const [lightbox, setLightbox] = useState<GalleryEntry | null>(null);
 
-  useEffect(() => {
-    const load = () => {
-      try {
-        const raw = typeof window !== "undefined" ? localStorage.getItem(PORTFOLIO_STORAGE_KEY) : null;
-        if (!raw) return setGallery([]);
-        const store = JSON.parse(raw) as Record<string, PortfolioItem[]>;
-        const items = store.videography || [];
-        const entries: GalleryEntry[] = [];
-        items.forEach((it) => {
-          (it.media || []).forEach((m: PortfolioMedia) => {
-            if (m.kind === "video" || m.kind === "link" || m.kind === "image") {
-              entries.push({
-                id: m.id,
-                url: m.url,
-                caption: m.caption,
-                projectTitle: it.title,
-                kind: m.kind,
-              });
-            }
+  const gallery = useMemo<GalleryEntry[]>(() => {
+    const items = portfolioStore.videography || [];
+    const entries: GalleryEntry[] = [];
+    items.forEach((it) => {
+      (it.media || []).forEach((m: PortfolioMedia) => {
+        if (m.kind === "video" || m.kind === "link" || m.kind === "image") {
+          entries.push({
+            id: m.id,
+            url: m.url,
+            caption: m.caption,
+            projectTitle: it.title,
+            kind: m.kind,
           });
-        });
-        setGallery(entries);
-      } catch {
-        setGallery([]);
-      }
-    };
-    load();
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === PORTFOLIO_STORAGE_KEY) load();
-    };
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
-  }, []);
+        }
+      });
+    });
+    return entries;
+  }, [portfolioStore.videography]);
 
   useEffect(() => {
     const id = setInterval(() => {

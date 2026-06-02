@@ -3,12 +3,9 @@ import { Link } from "@tanstack/react-router";
 import { ArrowLeft, Camera, Package, Layers } from "lucide-react";
 import { useAudio, useT } from "@/providers/AppProviders";
 
-const lensImg =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuDzAUks3bEK8NBleksITkg0uSHHGrX8TppVjgJDO82ViCklU8eSP9S8V1_q-CxX8OIBMUG_tmKBoC8iDSPjM33WfNwHUozltlPB9AIt2sE9PNrAJAaoMM3J_S2KC6YpAUKtlS4G4RLjva1zBa_4Z517vhYxEHeu3_eAkubH7y14rrK5BIrajysvZFbUlzKvhlCnlyyGwaCLuSntD9i9QA-SauFInqL7SkiVFarrPCQS0pks_HvwYRul8e3SFH6jussn4Ivt0FfLJSo";
-const dopImg =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuBxHX6f1aZIkT8EPJDBlBRG_uv-358_dyZMCVUu3z5WEhUDA4ZghFtL5SZfchAmToqTFrXIkFMcbyKKA6Z1HESkXEPN8Q_MedAV_hMsaVj3Qrqub_SNwVppky197UILzUbK1Lo45GOt9m_kuLTEnXB5so9UUA3gXiU7Lf5WYEKt94qbXJ_Q-0J9LjNSVqL7G4HcirTsBAQ64t_luNXt858RymcCxiw6btYU-RVhr-xN3rOBxAaDc5_fERRFi2JWtVlovMzTc32e6c4";
-const watchImg =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuCrEVF6LObR-uSyZwM2UToj2n4QZyAzn-ijJmGg8pWRfxev3fN7ChG-HzReBQ1OJjIKNEdA1aPbzD9keCOeMaVEbRnxy6Y-feQKt0Pr1hug4TPQFA5Y8dCCSoRD89wYRaJ8TWiYOpeTT40hthgpRmUMfw3AtgEGBVrEpDQuxKp1tnXZvmc1j5wZJyK7UiXRiPA7uSqMCyLMoP5oXQ3qDaoXNlYfqE6mj5lYXIIDL2nnYPx9SFB_ufthxGidVBCOTEIUb-IDm0mvXdQ";
+import lensImg from "@/assets/photo-lens.jpg";
+import dopImg from "@/assets/photo-dop.jpg";
+import watchImg from "@/assets/photo-watch.jpg";
 
 export function PhotographyHub() {
   const { click } = useAudio();

@@ -1,5 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { PortfolioManager } from "@/components/admin/PortfolioManager";
+import { ZoomHubManager } from "@/components/admin/ZoomHubManager";
+import { ClientsManager } from "@/components/admin/ClientsManager";
+import adminAvatar from "@/assets/admin-avatar.jpg";
+
 
 import {
   LayoutDashboard,
@@ -30,11 +34,15 @@ import {
   PlusCircle,
   MoreVertical,
   Cloud,
+  PhoneCall,
+  MessageSquare,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { useAudio, useTheme } from "@/providers/AppProviders";
+import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { ShieldCheck } from "lucide-react";
 
 type NavKey =
   | "dashboard"
@@ -42,7 +50,8 @@ type NavKey =
   | "portfolio"
   | "inquiries"
   | "audio"
-  | "scheduling";
+  | "scheduling"
+  | "clients";
 
 const navItems: { key: NavKey; label: string; Icon: typeof LayoutDashboard }[] = [
   { key: "dashboard", label: "Dashboard", Icon: LayoutDashboard },
@@ -50,12 +59,15 @@ const navItems: { key: NavKey; label: string; Icon: typeof LayoutDashboard }[] =
   { key: "portfolio", label: "Portfolio", Icon: FolderHeart },
   { key: "inquiries", label: "Inquiries", Icon: Mail },
   { key: "audio", label: "Audio", Icon: Music },
-  { key: "scheduling", label: "Scheduling", Icon: Video },
+  { key: "scheduling", label: "Zoom Hub", Icon: Video },
+  { key: "clients", label: "Clients", Icon: Users },
 ];
+
 
 type Inquiry = {
   id: string;
   name: string;
+  email: string;
   initials: string;
   time: string;
   msg: string;
@@ -84,6 +96,7 @@ function initialsOf(name: string): string {
 
 
 export function AdminDashboard() {
+  const { user, isAdmin, loading: authLoading } = useAuth();
   const [active, setActive] = useState<NavKey>("dashboard");
   const [tab, setTab] = useState<"home" | "web" | "3d">("home");
   const [videoUrl, setVideoUrl] = useState("");
@@ -91,7 +104,7 @@ export function AdminDashboard() {
   const [search, setSearch] = useState("");
   const [topTab, setTopTab] = useState<"analytics" | "log">("analytics");
   const { theme, toggle: toggleTheme } = useTheme();
-  const { muted, toggle, click } = useAudio();
+  const { muted, toggle, click, musicUrl, setMusicUrl } = useAudio();
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [totalVisitors, setTotalVisitors] = useState<number | null>(null);
@@ -100,6 +113,7 @@ export function AdminDashboard() {
   const [pendingCount, setPendingCount] = useState<number | null>(null);
 
   useEffect(() => {
+    if (authLoading || !user || !isAdmin) return;
     let cancelled = false;
     const load = async () => {
       const [visitsRes, msgRes] = await Promise.all([
@@ -121,6 +135,7 @@ export function AdminDashboard() {
           msgRes.data.map((m) => ({
             id: m.id,
             name: m.name,
+            email: m.email,
             initials: initialsOf(m.name),
             time: timeAgo(m.created_at),
             msg: m.brief,
@@ -138,7 +153,34 @@ export function AdminDashboard() {
       cancelled = true;
       clearInterval(interval);
     };
-  }, []);
+  }, [authLoading, user, isAdmin]);
+
+  const approveInquiry = async (i: Inquiry) => {
+    click();
+    const { error } = await supabase
+      .from("contact_messages")
+      .update({ status: "approved" })
+      .eq("id", i.id);
+    if (error) return toast.error("Failed: " + error.message);
+    setInquiries((arr) => arr.map((x) => (x.id === i.id ? { ...x, status: "approved" } : x)));
+    setPendingCount((c) => (c === null ? c : Math.max(0, c - (i.status === "pending" ? 1 : 0))));
+    toast.success(`Approved ${i.name}.`);
+  };
+
+  const deleteInquiry = async (i: Inquiry) => {
+    click();
+    if (!confirm(`Delete inquiry from ${i.name}?`)) return;
+    const { error } = await supabase.from("contact_messages").delete().eq("id", i.id);
+    if (error) return toast.error("Failed: " + error.message);
+    setInquiries((arr) => arr.filter((x) => x.id !== i.id));
+    if (i.status === "pending") setPendingCount((c) => (c === null ? c : Math.max(0, c - 1)));
+    toast.success("Inquiry deleted.");
+  };
+
+  const replyInquiry = (i: Inquiry) => {
+    click();
+    window.location.href = `mailto:${i.email}?subject=${encodeURIComponent("Re: Your project inquiry")}`;
+  };
 
 
   const onDeploy = () => {
@@ -154,6 +196,15 @@ export function AdminDashboard() {
     if (!f || !f.length) return;
     toast.success(`Queued ${f.length} file${f.length > 1 ? "s" : ""} for upload.`);
   };
+
+  if (authLoading) {
+    return <div className="min-h-screen pt-24 px-4 text-sm text-muted-foreground">Loading admin access…</div>;
+  }
+
+  if (!user || !isAdmin) {
+    return <AdminLoginGate signedInButNotAdmin={!!user && !isAdmin} />;
+  }
+
 
   return (
     <div className="min-h-screen pt-24 pb-12 px-4 sm:px-8">
@@ -251,7 +302,7 @@ export function AdminDashboard() {
               <div className="h-10 w-10 rounded-full border-2 border-[var(--electric)] overflow-hidden">
                 <img
                   alt="Admin"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAGgXRV52Yd89WzlAfvVisDmMZ5IFbMoIRUl-L70BhimBpawNKwRgnz5nIbe-ZWX0B5dTun-FRafsd0R_bB0ENkAUgqipUy5hnLdmNIyLDY_mKWDipqa2jJFwQpBmPsuezc5TziLZLGBsv0Qh3A-ez4YGQrzVSHb_9EGTm7qN1oggZ49BXEMFOJjLGaBACWtSThENjvyhCkK5Nm25g17Cz0bO7eQKYWONHbWxIsCM3-rEAYUcmn5yeW1Lajzzx2zVTeJFC_dR7FZw"
+                  src={adminAvatar}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -368,21 +419,42 @@ export function AdminDashboard() {
                 </div>
               </div>
 
-              {active === "dashboard" && <AudioConsole muted={muted} toggle={toggle} click={click} />}
+              {active === "dashboard" && (
+                <AudioConsole
+                  muted={muted}
+                  toggle={toggle}
+                  click={click}
+                  musicUrl={musicUrl}
+                  setMusicUrl={setMusicUrl}
+                />
+              )}
             </section>
           )}
 
           {active === "audio" && (
             <section className="max-w-xl">
-              <AudioConsole muted={muted} toggle={toggle} click={click} />
+              <AudioConsole
+                muted={muted}
+                toggle={toggle}
+                click={click}
+                musicUrl={musicUrl}
+                setMusicUrl={setMusicUrl}
+              />
             </section>
           )}
 
-          {/* Portfolio manager */}
+          {/* Portfolio manager (Branding Media lives inside the Branding category) */}
           {active === "portfolio" && <PortfolioManager />}
 
-          {/* Inquiries + Scheduling */}
-          {(active === "dashboard" || active === "inquiries" || active === "scheduling") && (
+          {/* Admin: Zoom Hub manager */}
+          {active === "scheduling" && <ZoomHubManager />}
+
+          {/* Admin: Clients manager (messages + calls live inside each client's profile) */}
+          {active === "clients" && <ClientsManager />}
+
+
+          {/* Inquiries + Scheduling preview */}
+          {(active === "dashboard" || active === "inquiries") && (
             <section className={`grid grid-cols-1 ${active === "dashboard" ? "lg:grid-cols-2" : ""} gap-5`}>
               {(active === "dashboard" || active === "inquiries") && (
                 <div className="panel-convex rounded-3xl p-6">
@@ -412,30 +484,33 @@ export function AdminDashboard() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex justify-between mb-0.5">
-                            <h5 className="font-bold text-sm">{i.name}</h5>
+                            <h5 className="font-bold text-sm">
+                              {i.name}
+                              {i.status !== "pending" && (
+                                <span className="ml-2 text-[9px] uppercase text-[var(--electric)]">{i.status}</span>
+                              )}
+                            </h5>
                             <span className="text-[10px] text-muted-foreground">{i.time}</span>
                           </div>
                           <p className="text-xs text-muted-foreground line-clamp-1">{i.msg}</p>
                           <div className="flex gap-2 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                click();
-                                toast.success(`Approved ${i.name}.`);
-                              }}
+                              onClick={(e) => { e.stopPropagation(); approveInquiry(i); }}
                               className="px-3 py-1 bg-primary text-primary-foreground text-[10px] font-bold rounded-lg"
                             >
                               Approve
                             </button>
                             <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                click();
-                                toast.info(`Reply window opened for ${i.name}.`);
-                              }}
+                              onClick={(e) => { e.stopPropagation(); replyInquiry(i); }}
                               className="px-3 py-1 panel-convex text-[10px] font-bold rounded-lg"
                             >
                               Quick Reply
+                            </button>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); deleteInquiry(i); }}
+                              className="px-3 py-1 text-destructive text-[10px] font-bold rounded-lg hover:bg-destructive/10"
+                            >
+                              Delete
                             </button>
                           </div>
                         </div>
@@ -445,7 +520,7 @@ export function AdminDashboard() {
                 </div>
               )}
 
-              {(active === "dashboard" || active === "scheduling") && (
+              {active === "dashboard" && (
                 <div className="panel-convex rounded-3xl p-6 flex flex-col">
                   <h2 className="text-lg font-bold flex items-center gap-2 mb-5">
                     <CalendarDays className="h-5 w-5 text-[var(--electric)]" />
@@ -586,14 +661,21 @@ function AudioConsole({
   muted,
   toggle,
   click,
+  musicUrl,
+  setMusicUrl,
 }: {
   muted: boolean;
   toggle: () => void;
   click: () => void;
+  musicUrl: string | null;
+  setMusicUrl: (url: string | null) => void;
 }) {
   const [heights, setHeights] = useState<number[]>(() =>
     Array.from({ length: 9 }, (_, i) => 8 + ((i * 7) % 20))
   );
+  const [urlInput, setUrlInput] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const trackFileRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (!!muted) return;
     const id = setInterval(() => {
@@ -601,6 +683,38 @@ function AudioConsole({
     }, 160);
     return () => clearInterval(id);
   }, [muted]);
+
+  const applyUrl = () => {
+    const v = urlInput.trim();
+    if (!v) return toast.error("Paste a track URL first.");
+    setMusicUrl(v);
+    setUrlInput("");
+    toast.success("Track updated.");
+  };
+
+  const onUpload = async (file: File | undefined) => {
+    if (!file) return;
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "mp3";
+      const path = `music/${Date.now()}.${ext}`;
+      const { error } = await supabase.storage
+        .from("admin-media")
+        .upload(path, file, { upsert: true, contentType: file.type });
+      if (error) throw error;
+      const { data } = supabase.storage.from("admin-media").getPublicUrl(path);
+      setMusicUrl(data.publicUrl);
+      toast.success("Track uploaded.");
+    } catch (e) {
+      toast.error("Upload failed: " + (e as Error).message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const trackName = musicUrl
+    ? decodeURIComponent(musicUrl.split("/").pop() || "Custom Track")
+    : "Midnight Tactical Symphony";
 
   return (
     <div className="panel-convex rounded-3xl p-6 flex flex-col">
@@ -622,8 +736,10 @@ function AudioConsole({
           <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--electric)] mb-1">
             Global Track
           </p>
-          <h4 className="text-base font-bold">Midnight Tactical Symphony</h4>
-          <p className="text-[10px] text-muted-foreground">By OUZESOF Labs</p>
+          <h4 className="text-base font-bold truncate max-w-[240px] mx-auto">{trackName}</h4>
+          <p className="text-[10px] text-muted-foreground">
+            {musicUrl ? "Custom uploaded track" : "By OUZESOF Labs (synth)"}
+          </p>
         </div>
         <div className="flex items-center gap-7">
           <button onClick={click} className="text-muted-foreground hover:text-[var(--electric)]">
@@ -641,15 +757,113 @@ function AudioConsole({
           </button>
         </div>
       </div>
-      <button
-        onClick={() => {
-          click();
-          toast.info("Track library opened.");
-        }}
-        className="mt-6 py-3 w-full panel-concave rounded-xl text-[10px] font-bold uppercase tracking-widest hover:text-[var(--electric)] transition"
-      >
-        Change Global Track
-      </button>
+
+      <div className="mt-6 space-y-3">
+        <div className="panel-concave rounded-xl px-3 py-2 flex items-center gap-2">
+          <LinkIcon className="h-4 w-4 text-muted-foreground" />
+          <input
+            value={urlInput}
+            onChange={(e) => setUrlInput(e.target.value)}
+            placeholder="Paste track URL (mp3, wav...)"
+            className="bg-transparent border-none outline-none text-xs w-full"
+          />
+          <button
+            onClick={applyUrl}
+            className="text-[10px] font-bold uppercase tracking-wider text-[var(--electric)]"
+          >
+            Set
+          </button>
+        </div>
+        <div className="flex gap-2">
+          <input
+            ref={trackFileRef}
+            type="file"
+            accept="audio/*"
+            className="hidden"
+            onChange={(e) => onUpload(e.target.files?.[0])}
+          />
+          <button
+            onClick={() => trackFileRef.current?.click()}
+            disabled={uploading}
+            className="flex-1 py-2.5 panel-convex rounded-xl text-[10px] font-bold uppercase tracking-widest hover:text-[var(--electric)] transition disabled:opacity-50"
+          >
+            {uploading ? "Uploading..." : "Upload Audio File"}
+          </button>
+          {musicUrl && (
+            <button
+              onClick={() => {
+                setMusicUrl(null);
+                toast.success("Reverted to default ambient.");
+              }}
+              className="px-3 py-2.5 panel-concave rounded-xl text-[10px] font-bold uppercase tracking-widest text-destructive hover:bg-destructive/10 transition"
+            >
+              Reset
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AdminLoginGate({ signedInButNotAdmin }: { signedInButNotAdmin: boolean }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setLoading(false);
+    if (error) return toast.error(error.message);
+    toast.success("Signed in. Verifying admin access…");
+  };
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center px-4 pt-24 pb-12">
+      <div className="w-full max-w-md frosted rounded-3xl p-8 space-y-5">
+        <div className="text-center">
+          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--electric)]/15 text-[var(--electric)] mb-3">
+            <ShieldCheck className="h-6 w-6" />
+          </div>
+          <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-[var(--electric)]">Admin Console</p>
+          <h1 className="mt-2 font-display text-3xl font-black">Sign in</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {signedInButNotAdmin
+              ? "This account doesn't have admin access."
+              : "Admin login is separate from the client portal."}
+          </p>
+        </div>
+        {signedInButNotAdmin ? (
+          <button onClick={signOut} className="w-full panel-convex rounded-xl py-3 text-sm font-bold">
+            Sign out and switch accounts
+          </button>
+        ) : (
+          <form onSubmit={onSubmit} className="space-y-3">
+            <input
+              type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
+              placeholder="Admin email"
+              className="w-full panel-concave rounded-xl px-4 py-3 text-sm bg-transparent outline-none"
+            />
+            <input
+              type="password" required value={password} onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password" minLength={6}
+              className="w-full panel-concave rounded-xl px-4 py-3 text-sm bg-transparent outline-none"
+            />
+            <button
+              type="submit" disabled={loading}
+              className="w-full bg-primary text-primary-foreground rounded-xl py-3 font-bold text-sm disabled:opacity-50"
+            >
+              {loading ? "Signing in…" : "Sign in to admin"}
+            </button>
+          </form>
+        )}
+      </div>
     </div>
   );
 }

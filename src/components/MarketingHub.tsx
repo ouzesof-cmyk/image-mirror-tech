@@ -16,8 +16,7 @@ import {
 } from "lucide-react";
 import { useAudio, useT } from "@/providers/AppProviders";
 
-const heroImg =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuAOT6Xn8kQrTniInsCknGEmplyWWosMtoJWNPEoEW_ogIcZAFwnZLDTyCh-IQhDSmMJUKD6TyXplB46xkHDCl8Kkfz3CVv02VjIroVD7NDIM2L5KhPgh_YVJXMdIuJtEgk7JXZzusE5JxHor3uB0GGMGpprG1SgWPWKI8FqmzECeQ-oinTMBK4DrgWGkeBkNPiwABMh5D8L116JrSxzL9zEhUhEAwQ8nwbLiU11_NwX_HT8chm0SIWsa11BCygbgoSwyl9jn1EAQ5U";
+import heroImg from "@/assets/marketing-hero.jpg";
 
 export function MarketingHub() {
   const { click } = useAudio();

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   ArrowLeft,
   PlusCircle,
@@ -16,32 +16,21 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAudio } from "@/providers/AppProviders";
+import {
+  usePortfolio,
+  createPortfolioItem,
+  updatePortfolioItem,
+  deletePortfolioItem,
+  type CategoryKey,
+  type PortfolioItem,
+  type PortfolioMedia,
+  type MediaKind,
+} from "@/lib/portfolioStore";
+import { uploadAdminMedia } from "@/lib/brandingMedia";
+import { BrandingMediaManager } from "@/components/admin/BrandingMediaManager";
 
-type MediaKind = "image" | "video" | "link";
-
-export type PortfolioMedia = {
-  id: string;
-  kind: MediaKind;
-  url: string;
-  caption?: string;
-};
-
-export type PortfolioItem = {
-  id: string;
-  title: string;
-  description: string;
-  cover?: string;
-  media: PortfolioMedia[];
-  createdAt: number;
-};
-
-type CategoryKey =
-  | "web"
-  | "3d"
-  | "photography"
-  | "videography"
-  | "marketing"
-  | "branding";
+// Re-export types for backwards compatibility with other components
+export type { PortfolioItem, PortfolioMedia, MediaKind } from "@/lib/portfolioStore";
 
 const categories: {
   key: CategoryKey;
@@ -57,61 +46,29 @@ const categories: {
   { key: "branding", label: "Branding", desc: "Identity, typography, systems", Icon: Sparkles },
 ];
 
-const STORAGE_KEY = "ouzesof:portfolio:v1";
-
-type Store = Record<CategoryKey, PortfolioItem[]>;
-
-const emptyStore: Store = {
-  web: [], "3d": [], photography: [], videography: [], marketing: [], branding: [],
-};
-
-function loadStore(): Store {
-  if (typeof window === "undefined") return emptyStore;
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return emptyStore;
-    return { ...emptyStore, ...JSON.parse(raw) };
-  } catch {
-    return emptyStore;
-  }
-}
-
-function saveStore(store: Store) {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
-}
-
-const uid = () => Math.random().toString(36).slice(2, 10);
+const uid = () => crypto.randomUUID();
 
 export function PortfolioManager() {
   const { click } = useAudio();
-  const [store, setStore] = useState<Store>(emptyStore);
-  const [hydrated, setHydrated] = useState(false);
+  const { store, hydrated } = usePortfolio();
   const [category, setCategory] = useState<CategoryKey | null>(null);
   const [itemId, setItemId] = useState<string | null>(null);
-
-  useEffect(() => {
-    setStore(loadStore());
-    setHydrated(true);
-  }, []);
-
-  useEffect(() => {
-    if (hydrated) saveStore(store);
-  }, [store, hydrated]);
-
-  const update = (cat: CategoryKey, items: PortfolioItem[]) =>
-    setStore((s) => ({ ...s, [cat]: items }));
+  // Buffer for a just-created item so the editor opens immediately even if
+  // realtime hasn't refreshed `store` yet.
+  const [pending, setPending] = useState<PortfolioItem | null>(null);
 
   if (!hydrated) {
     return <div className="panel-convex rounded-3xl p-6 text-sm text-muted-foreground">Loading…</div>;
   }
 
-  // Level 3: media editor for a single item
   if (category && itemId) {
     const items = store[category];
-    const item = items.find((i) => i.id === itemId);
+    const item =
+      items.find((i) => i.id === itemId) ??
+      (pending && pending.id === itemId ? pending : null);
     if (!item) {
       setItemId(null);
+      setPending(null);
       return null;
     }
     return (
@@ -120,104 +77,102 @@ export function PortfolioManager() {
         onBack={() => {
           click();
           setItemId(null);
+          setPending(null);
         }}
-        onChange={(next) =>
-          update(category, items.map((i) => (i.id === item.id ? next : i)))
-        }
-        onDelete={() => {
-          update(category, items.filter((i) => i.id !== item.id));
-          setItemId(null);
-          toast.success("Project deleted.");
+        onSaved={() => setPending(null)}
+        onDelete={async () => {
+          try {
+            await deletePortfolioItem(item.id);
+            setItemId(null);
+            setPending(null);
+            toast.success("Project deleted.");
+          } catch (e) {
+            toast.error("Delete failed: " + (e as Error).message);
+          }
         }}
       />
     );
   }
 
-  // Level 2: list of items inside a category
   if (category) {
     const items = store[category];
     const cat = categories.find((c) => c.key === category)!;
     return (
-      <div className="panel-convex rounded-3xl p-6 space-y-5">
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <button
-            onClick={() => {
-              click();
-              setCategory(null);
-            }}
-            className="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-[var(--electric)]"
-          >
-            <ArrowLeft className="h-4 w-4" /> All Categories
-          </button>
-          <h2 className="text-lg font-bold flex items-center gap-2">
-            <cat.Icon className="h-5 w-5 text-[var(--electric)]" />
-            {cat.label} — {items.length} project{items.length !== 1 ? "s" : ""}
-          </h2>
-          <button
-            onClick={() => {
-              click();
-              const id = uid();
-              const next: PortfolioItem = {
-                id,
-                title: "Untitled Project",
-                description: "",
-                media: [],
-                createdAt: Date.now(),
-              };
-              update(category, [next, ...items]);
-              setItemId(id);
-              toast.success("Project created.");
-            }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-xl text-xs font-bold hover:scale-[1.02] transition"
-          >
-            <PlusCircle className="h-4 w-4" /> New Project
-          </button>
+      <div className="space-y-6">
+        <div className="panel-convex rounded-3xl p-6 space-y-5">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <button
+              onClick={() => { click(); setCategory(null); }}
+              className="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-[var(--electric)]"
+            >
+              <ArrowLeft className="h-4 w-4" /> All Categories
+            </button>
+            <h2 className="text-lg font-bold flex items-center gap-2">
+              <cat.Icon className="h-5 w-5 text-[var(--electric)]" />
+              {cat.label} — {items.length} project{items.length !== 1 ? "s" : ""}
+            </h2>
+            <button
+              onClick={async () => {
+                click();
+                try {
+                  const created = await createPortfolioItem(category);
+                  setPending(created);
+                  setItemId(created.id);
+                  toast.success("Project created.");
+                } catch (e) {
+                  toast.error("Create failed: " + (e as Error).message);
+                }
+              }}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-xl text-xs font-bold hover:scale-[1.02] transition"
+            >
+              <PlusCircle className="h-4 w-4" /> New Project
+            </button>
+          </div>
+
+          {items.length === 0 ? (
+            <div className="panel-concave rounded-2xl p-10 text-center text-sm text-muted-foreground">
+              No projects yet. Click <span className="text-[var(--electric)] font-semibold">New Project</span> to add one.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {items.map((it) => (
+                <button
+                  key={it.id}
+                  onClick={() => { click(); setItemId(it.id); }}
+                  className="text-left panel-concave rounded-2xl overflow-hidden border border-border/40 hover:border-[var(--electric)]/60 transition group"
+                >
+                  <div className="aspect-video bg-foreground/5 overflow-hidden">
+                    {it.cover ? (
+                      <img src={it.cover} alt={it.title} className="w-full h-full object-cover group-hover:scale-105 transition" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                        <ImageIcon className="h-8 w-8" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-bold text-sm truncate">{it.title}</h3>
+                    <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2 min-h-[2.2em]">
+                      {it.description || "No description"}
+                    </p>
+                    <div className="mt-3 flex gap-3 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                      <span><ImageIcon className="h-3 w-3 inline mr-1" />{it.media.filter(m => m.kind === "image").length}</span>
+                      <span><Film className="h-3 w-3 inline mr-1" />{it.media.filter(m => m.kind === "video").length}</span>
+                      <span><LinkIcon className="h-3 w-3 inline mr-1" />{it.media.filter(m => m.kind === "link").length}</span>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
-        {items.length === 0 ? (
-          <div className="panel-concave rounded-2xl p-10 text-center text-sm text-muted-foreground">
-            No projects yet. Click <span className="text-[var(--electric)] font-semibold">New Project</span> to add one.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {items.map((it) => (
-              <button
-                key={it.id}
-                onClick={() => {
-                  click();
-                  setItemId(it.id);
-                }}
-                className="text-left panel-concave rounded-2xl overflow-hidden border border-border/40 hover:border-[var(--electric)]/60 transition group"
-              >
-                <div className="aspect-video bg-foreground/5 overflow-hidden">
-                  {it.cover ? (
-                    <img src={it.cover} alt={it.title} className="w-full h-full object-cover group-hover:scale-105 transition" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                      <ImageIcon className="h-8 w-8" />
-                    </div>
-                  )}
-                </div>
-                <div className="p-4">
-                  <h3 className="font-bold text-sm truncate">{it.title}</h3>
-                  <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2 min-h-[2.2em]">
-                    {it.description || "No description"}
-                  </p>
-                  <div className="mt-3 flex gap-3 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-                    <span><ImageIcon className="h-3 w-3 inline mr-1" />{it.media.filter(m => m.kind === "image").length}</span>
-                    <span><Film className="h-3 w-3 inline mr-1" />{it.media.filter(m => m.kind === "video").length}</span>
-                    <span><LinkIcon className="h-3 w-3 inline mr-1" />{it.media.filter(m => m.kind === "link").length}</span>
-                  </div>
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
+        {/* Branding category: surface carousel + gallery managers right here. */}
+        {category === "branding" && <BrandingMediaManager />}
       </div>
     );
   }
 
-  // Level 1: categories grid
   return (
     <div className="panel-convex rounded-3xl p-6 space-y-5">
       <div className="flex items-center gap-2">
@@ -230,10 +185,7 @@ export function PortfolioManager() {
           return (
             <button
               key={c.key}
-              onClick={() => {
-                click();
-                setCategory(c.key);
-              }}
+              onClick={() => { click(); setCategory(c.key); }}
               className="text-left panel-concave p-5 rounded-2xl border border-border/40 hover:border-[var(--electric)]/60 transition"
             >
               <div className="flex justify-between items-start mb-4">
@@ -255,106 +207,120 @@ export function PortfolioManager() {
 }
 
 function ItemEditor({
-  item,
-  onBack,
-  onChange,
-  onDelete,
+  item, onBack, onSaved, onDelete,
 }: {
   item: PortfolioItem;
   onBack: () => void;
-  onChange: (next: PortfolioItem) => void;
+  onSaved: () => void;
   onDelete: () => void;
 }) {
   const { click } = useAudio();
+  const [draft, setDraft] = useState<PortfolioItem>(item);
   const [kind, setKind] = useState<MediaKind>("image");
   const [url, setUrl] = useState("");
   const [caption, setCaption] = useState("");
+  const [saving, setSaving] = useState(false);
 
-  const addMedia = () => {
+  const save = async (next: PortfolioItem) => {
+    setDraft(next);
+    setSaving(true);
+    try {
+      await updatePortfolioItem(next);
+      onSaved();
+    } catch (e) {
+      toast.error("Save failed: " + (e as Error).message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const addMedia = async () => {
     if (!url.trim()) {
       toast.error("Enter a URL first.");
       return;
     }
     click();
     const m: PortfolioMedia = { id: uid(), kind, url: url.trim(), caption: caption.trim() || undefined };
-    const nextMedia = [...item.media, m];
-    onChange({
-      ...item,
+    const nextMedia = [...draft.media, m];
+    await save({
+      ...draft,
       media: nextMedia,
-      cover: item.cover || (kind === "image" ? m.url : item.cover),
+      cover: draft.cover || (kind === "image" ? m.url : draft.cover),
     });
     setUrl("");
     setCaption("");
     toast.success(`${kind} added.`);
   };
 
-  const onFile = (files: FileList | null) => {
+  const onFile = async (files: FileList | null) => {
     if (!files || !files.length) return;
     click();
-    const list: PortfolioMedia[] = [];
-    Array.from(files).forEach((f) => {
-      const blob = URL.createObjectURL(f);
-      const isVideo = f.type.startsWith("video/");
-      list.push({ id: uid(), kind: isVideo ? "video" : "image", url: blob, caption: f.name });
-    });
-    const nextMedia = [...item.media, ...list];
-    const newCover = item.cover || list.find((m) => m.kind === "image")?.url;
-    onChange({ ...item, media: nextMedia, cover: newCover });
-    toast.success(`${list.length} file${list.length > 1 ? "s" : ""} added.`);
+    try {
+      const list: PortfolioMedia[] = [];
+      for (const f of Array.from(files)) {
+        const isVideo = f.type.startsWith("video/");
+        const publicUrl = await uploadAdminMedia(f, "portfolio");
+        list.push({ id: uid(), kind: isVideo ? "video" : "image", url: publicUrl, caption: f.name });
+      }
+      const nextMedia = [...draft.media, ...list];
+      const newCover = draft.cover || list.find((m) => m.kind === "image")?.url;
+      await save({ ...draft, media: nextMedia, cover: newCover });
+      toast.success(`${list.length} file${list.length > 1 ? "s" : ""} uploaded.`);
+    } catch (e) {
+      toast.error("Upload failed: " + (e as Error).message);
+    }
   };
 
-  const removeMedia = (id: string) => {
+  const removeMedia = async (id: string) => {
     click();
-    onChange({ ...item, media: item.media.filter((m) => m.id !== id) });
+    await save({ ...draft, media: draft.media.filter((m) => m.id !== id) });
   };
 
-  const setCover = (url: string) => {
+  const setCover = async (url: string) => {
     click();
-    onChange({ ...item, cover: url });
+    await save({ ...draft, cover: url });
     toast.success("Cover updated.");
   };
 
   return (
     <div className="panel-convex rounded-3xl p-6 space-y-6">
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <button
-          onClick={onBack}
-          className="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-[var(--electric)]"
-        >
+        <button onClick={onBack} className="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-[var(--electric)]">
           <ArrowLeft className="h-4 w-4" /> Back
         </button>
+        <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+          {saving ? "Saving…" : "Saved"}
+        </span>
         <button
-          onClick={() => {
-            if (confirm("Delete this project?")) onDelete();
-          }}
+          onClick={() => { if (confirm("Delete this project?")) onDelete(); }}
           className="inline-flex items-center gap-2 px-3 py-1.5 text-[11px] font-bold uppercase tracking-widest rounded-lg text-destructive hover:bg-destructive/10"
         >
           <Trash2 className="h-3.5 w-3.5" /> Delete
         </button>
       </div>
 
-      {/* Meta */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Title</label>
           <input
-            value={item.title}
-            onChange={(e) => onChange({ ...item, title: e.target.value })}
+            value={draft.title}
+            onChange={(e) => setDraft({ ...draft, title: e.target.value })}
+            onBlur={() => save(draft)}
             className="mt-1 w-full panel-concave rounded-xl py-3 px-4 text-sm bg-transparent outline-none"
           />
         </div>
         <div>
           <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Description</label>
           <input
-            value={item.description}
-            onChange={(e) => onChange({ ...item, description: e.target.value })}
+            value={draft.description}
+            onChange={(e) => setDraft({ ...draft, description: e.target.value })}
+            onBlur={() => save(draft)}
             placeholder="Short summary…"
             className="mt-1 w-full panel-concave rounded-xl py-3 px-4 text-sm bg-transparent outline-none"
           />
         </div>
       </div>
 
-      {/* Add media */}
       <div className="panel-concave rounded-2xl p-5 space-y-4">
         <h3 className="text-sm font-bold flex items-center gap-2">
           <PlusCircle className="h-4 w-4 text-[var(--electric)]" /> Add media
@@ -376,13 +342,7 @@ function ItemEditor({
           <input
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder={
-              kind === "video"
-                ? "https://youtube.com/... or .mp4"
-                : kind === "link"
-                ? "https://project-link.com"
-                : "https://image.jpg"
-            }
+            placeholder={kind === "video" ? "https://youtube.com/... or .mp4" : kind === "link" ? "https://project-link.com" : "https://image.jpg"}
             className="panel-convex rounded-xl py-3 px-4 text-sm bg-transparent outline-none"
           />
           <input
@@ -393,10 +353,7 @@ function ItemEditor({
           />
         </div>
         <div className="flex flex-wrap gap-3">
-          <button
-            onClick={addMedia}
-            className="px-5 py-2.5 bg-primary text-primary-foreground font-bold text-xs rounded-xl hover:brightness-110"
-          >
+          <button onClick={addMedia} className="px-5 py-2.5 bg-primary text-primary-foreground font-bold text-xs rounded-xl hover:brightness-110">
             Add by URL
           </button>
           <label className="px-5 py-2.5 panel-convex font-bold text-xs rounded-xl cursor-pointer hover:text-[var(--electric)]">
@@ -406,16 +363,15 @@ function ItemEditor({
         </div>
       </div>
 
-      {/* Media list */}
       <div className="space-y-3">
-        <h3 className="text-sm font-bold">Media ({item.media.length})</h3>
-        {item.media.length === 0 ? (
+        <h3 className="text-sm font-bold">Media ({draft.media.length})</h3>
+        {draft.media.length === 0 ? (
           <div className="panel-concave rounded-2xl p-8 text-center text-sm text-muted-foreground">
             No media yet. Add images, videos, or links above.
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {item.media.map((m) => (
+            {draft.media.map((m) => (
               <div key={m.id} className="panel-concave rounded-2xl overflow-hidden border border-border/40">
                 <div className="aspect-video bg-foreground/5 flex items-center justify-center">
                   {m.kind === "image" ? (
@@ -443,9 +399,9 @@ function ItemEditor({
                       {m.kind === "image" && (
                         <button
                           onClick={() => setCover(m.url)}
-                          className={`hover:text-[var(--electric)] ${item.cover === m.url ? "text-[var(--electric)]" : ""}`}
+                          className={`hover:text-[var(--electric)] ${draft.cover === m.url ? "text-[var(--electric)]" : ""}`}
                         >
-                          {item.cover === m.url ? "Cover ★" : "Set cover"}
+                          {draft.cover === m.url ? "Cover ★" : "Set cover"}
                         </button>
                       )}
                       <button onClick={() => removeMedia(m.id)} className="hover:text-destructive">
